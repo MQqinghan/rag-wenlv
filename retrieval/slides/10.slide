@@ -1,0 +1,35 @@
+<Slide style={{ width: 1280, height: 720, background: '#FAF8F3', position: 'relative', overflow: 'hidden' }}>
+    {/* 全幅底图 + 深色蒙版 */}
+    <Image src="assets/hero_ink_landscape.png" style={{ position: 'absolute', top: 0, left: 0, width: 1280, height: 720, objectFit: 'cover' }} />
+    <Box style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(20,32,28,0.62)' }} />
+    {/* 居中内容 */}
+    <Box style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', padding: '0 110px' }}>
+        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 15, color: 'rgba(255,255,255,0.75)', letterSpacing: 6 }}>项 目 小 结</Text>
+        <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 38, fontWeight: 'bold', color: '#FAF8F3', marginTop: 18, letterSpacing: 1 }}>资料进得来 · 问题听得懂 · 答案查得实 · 行程排得出</Text>
+        <Box style={{ width: 64, height: 3, background: '#B5542D', marginTop: 22 }} />
+        <Box style={{ flexDirection: 'row', gap: 20, marginTop: 34 }}>
+            <Box style={{ width: 300, background: 'rgba(255,255,255,0.12)', borderRadius: 12, padding: '18px 22px' }}>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 20, fontWeight: 'bold', color: 'rgba(255,255,255,0.65)' }}>01</Text>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 18, fontWeight: 'bold', color: '#FAF8F3' }}>资料持续上架</Text>
+                </Box>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6, marginTop: 8 }}>更多书籍与景点内容入馆，馆藏越来越厚。</Text>
+            </Box>
+            <Box style={{ width: 300, background: 'rgba(255,255,255,0.12)', borderRadius: 12, padding: '18px 22px' }}>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 20, fontWeight: 'bold', color: 'rgba(255,255,255,0.65)' }}>02</Text>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 18, fontWeight: 'bold', color: '#FAF8F3' }}>能力继续延伸</Text>
+                </Box>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6, marginTop: 8 }}>接入更多实时信息，多轮追问更自然。</Text>
+            </Box>
+            <Box style={{ width: 300, background: 'rgba(255,255,255,0.12)', borderRadius: 12, padding: '18px 22px' }}>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 20, fontWeight: 'bold', color: 'rgba(255,255,255,0.65)' }}>03</Text>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 18, fontWeight: 'bold', color: '#FAF8F3' }}>走向真实业务</Text>
+                </Box>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6, marginTop: 8 }}>面向运营与客服推广，用真实问题反哺优化。</Text>
+            </Box>
+        </Box>
+        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 15, color: 'rgba(255,255,255,0.7)', letterSpacing: 3, marginTop: 36 }}>感谢聆听 · 欢迎试用</Text>
+    </Box>
+</Slide>

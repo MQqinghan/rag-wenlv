@@ -1,0 +1,60 @@
+<Slide style={{ width: 1280, height: 720, background: '#FAF8F3' }}>
+    {/* A 区 · 标题块 */}
+    <Box style={{ height: 110, padding: '24px 64px 0 64px' }}>
+        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: '#2F6E63', letterSpacing: 3 }}>项目成果</Text>
+        <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 34, fontWeight: 'bold', color: '#26302C', marginTop: 8 }}>一组数字，看交付成果</Text>
+    </Box>
+    {/* B 区 · 左巨型 100% / 右三组数字 */}
+    <Box style={{ flex: 1, padding: '10px 64px 0 64px', flexDirection: 'row', gap: 48, alignItems: 'center' }}>
+        <Box style={{ flex: 4, justifyContent: 'center' }}>
+            <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 120, fontWeight: 'bold', color: '#B5542D', lineHeight: 1.0 }}>100%</Text>
+            <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 20, fontWeight: 'bold', color: '#26302C', marginTop: 16 }}>40 道验收考题，全部通过</Text>
+            <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 15, color: '#26302C', opacity: 0.72, lineHeight: 1.6, marginTop: 10 }}>
+                其中 6 道是资料里查不到的「陷阱题」，专门考它会不会瞎编——结果零编造。
+            </Text>
+        </Box>
+        <Box style={{ flex: 3, flexDirection: 'column' }}>
+            <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 20, padding: '14px 0' }}>
+                <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 56, fontWeight: 'bold', color: '#2F6E63', width: 96 }}>2</Text>
+                <Box style={{ flex: 1 }}>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 19, fontWeight: 'bold', color: '#26302C' }}>个问答领域</Text>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 15, color: '#26302C', opacity: 0.72, marginTop: 4 }}>文旅 + 行程规划，一个入口全搞定</Text>
+                </Box>
+            </Box>
+            <Box style={{ height: 1, background: 'rgba(38,48,44,0.14)' }} />
+            <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 20, padding: '14px 0' }}>
+                <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 56, fontWeight: 'bold', color: '#2F6E63', width: 96 }}>12</Text>
+                <Box style={{ flex: 1 }}>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 19, fontWeight: 'bold', color: '#26302C' }}>类文旅内容</Text>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 15, color: '#26302C', opacity: 0.72, marginTop: 4 }}>景点、线路、酒店、美食、交通……全部整理上架</Text>
+                </Box>
+            </Box>
+            <Box style={{ height: 1, background: 'rgba(38,48,44,0.14)' }} />
+            <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 20, padding: '14px 0' }}>
+                <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 56, fontWeight: 'bold', color: '#2F6E63', width: 96 }}>6</Text>
+                <Box style={{ flex: 1 }}>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 19, fontWeight: 'bold', color: '#26302C' }}>种资料格式</Text>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 15, color: '#26302C', opacity: 0.72, marginTop: 4 }}>PDF、Word、音频、图片……都能「吃进」知识库</Text>
+                </Box>
+            </Box>
+        </Box>
+    </Box>
+    {/* 洞察条 */}
+    <Box style={{ margin: '20px 64px 74px 64px', borderRadius: 12, background: 'rgba(47,110,99,0.07)', padding: '18px 26px' }}>
+        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 17, color: '#26302C' }}>
+            四个数字连起来是一个闭环：
+            <span style={{ fontWeight: 'bold', color: '#2F6E63' }}>资料进得来</span>
+            <span style={{ color: '#B5542D', fontWeight: 'bold' }}> → </span>
+            <span style={{ fontWeight: 'bold', color: '#2F6E63' }}>问题听得懂</span>
+            <span style={{ color: '#B5542D', fontWeight: 'bold' }}> → </span>
+            <span style={{ fontWeight: 'bold', color: '#2F6E63' }}>答案查得实</span>
+            <span style={{ color: '#B5542D', fontWeight: 'bold' }}> → </span>
+            <span style={{ fontWeight: 'bold', color: '#2F6E63' }}>效果考得出</span>
+        </Text>
+    </Box>
+    {/* C 区 · 页脚 */}
+    <Box style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: '0 64px' }}>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>文旅智能问答助手</Text>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>03 / 10</Text>
+    </Box>
+</Slide>

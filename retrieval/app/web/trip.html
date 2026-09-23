@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>智能旅行助手 · 结构化行程规划</title>
+<style>
+:root {
+  --brand: #667eea;
+  --brand2: #764ba2;
+  --bg: #f4f6fb;
+  --card: #ffffff;
+  --text: #2d3748;
+  --muted: #718096;
+  --ok: #38a169;
+  --warn: #dd6b20;
+  --err: #e53e3e;
+  --radius: 14px;
+  --shadow: 0 6px 24px rgba(102, 126, 234, 0.12);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+.topbar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+}
+.topbar .brand { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
+.topbar .links a {
+  color: rgba(255,255,255,.9); text-decoration: none; margin-left: 18px;
+  font-size: 14px; padding: 6px 12px; border-radius: 20px;
+  transition: background .2s;
+}
+.topbar .links a:hover { background: rgba(255,255,255,.18); }
+.container { max-width: 1180px; margin: 26px auto; padding: 0 18px; }
+.page-title { font-size: 30px; font-weight: 800; margin-bottom: 6px; }
+.page-sub { color: var(--muted); margin-bottom: 22px; }
+.card {
+  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 22px 24px; margin-bottom: 20px;
+}
+.card h2 { font-size: 17px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.section { margin-bottom: 18px; }
+.section-label { font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
+.grid .c4 { grid-column: span 4; }
+.grid .c3 { grid-column: span 3; }
+.grid .c6 { grid-column: span 6; }
+.grid .c12 { grid-column: span 12; }
+@media (max-width: 860px) { .grid .c4, .grid .c3, .grid .c6 { grid-column: span 12; } }
+label.field-label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+input, select, textarea {
+  width: 100%; padding: 10px 12px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+  font-size: 14px; font-family: inherit; outline: none; transition: border .2s, box-shadow .2s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--brand); box-shadow: 0 0 0 3px rgba(102,126,234,.15);
+}
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  padding: 7px 14px; border-radius: 20px; border: 1.5px solid #e2e8f0; cursor: pointer;
+  font-size: 13px; background: #fff; transition: all .2s; user-select: none;
+}
+.chip.on { border-color: var(--brand); color: var(--brand); background: #eef1ff; font-weight: 600; }
+.days-badge {
+  display: inline-flex; align-items: center; justify-content: center; height: 42px;
+  padding: 0 16px; background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff; font-weight: 700; border-radius: 10px; width: 100%; font-size: 16px;
+}
+.btn {
+  cursor: pointer; border: none; border-radius: 28px; padding: 12px 26px;
+  font-size: 15px; font-weight: 600; transition: all .2s; font-family: inherit;
+}
+.btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; box-shadow: 0 8px 24px rgba(102,126,234,.4); }
+.btn-primary:hover { transform: translateY(-2px); }
+.btn-primary:disabled { opacity: .6; transform: none; cursor: not-allowed; }
+.btn-ghost { background: #eef1ff; color: var(--brand); }
+.btn-sm { padding: 6px 14px; font-size: 13px; border-radius: 16px; }
+.btn-ghost:hover { background: #e0e6ff; }
+.hidden { display: none !important; }
+/* ---- 加载进度 ---- */
+.progress-panel { text-align: center; padding: 30px 20px; }
+.spinner {
+  width: 56px; height: 56px; margin: 0 auto 18px; border-radius: 50%;
+  border: 5px solid #e2e8f0; border-top-color: var(--brand);
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.stage-text { font-size: 17px; font-weight: 700; color: var(--brand); margin-bottom: 8px; }
+.stage-sub { color: var(--muted); font-size: 13px; }
+.stage-line { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.stage-step { padding: 6px 12px; border-radius: 16px; background: #edf2f7; color: var(--muted); font-size: 12px; }
+.stage-step.done { background: #e6ffed; color: var(--ok); }
+.stage-step.active { background: #eef1ff; color: var(--brand); font-weight: 600; }
+
+/* ---- 结果区 ---- */
+.result-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.overview-rows { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
+.info-item { background: #f8f9ff; border-radius: 10px; padding: 12px 14px; }
+.info-item .k { color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+.info-item .v { font-weight: 600; font-size: 14px; white-space: pre-line; }
+.budget-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 6px; }
+.budget-item { background: #f8f9ff; border-radius: 10px; padding: 12px; text-align: center; }
+.budget-item .bl { color: var(--muted); font-size: 12px; }
+.budget-item .bv { font-size: 19px; font-weight: 800; color: var(--brand); margin-top: 4px; }
+.budget-total { margin-top: 14px; display: flex; justify-content: flex-end; gap: 10px; align-items: baseline; }
+.budget-total .t { color: var(--muted); }
+.budget-total .v { font-size: 24px; font-weight: 800; color: var(--brand2); }
+.notice { border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.7; margin-top: 12px; white-space: pre-line; }
+.notice.warn { background: #fff7ed; color: #9a3412; }
+.notice.ok { background: #f0fff4; color: #276749; }
+.notice.err { background: #fff5f5; color: #9b2c2c; }
+
+/* ---- 地图 ---- */
+#map-wrap { width: 100%; height: 480px; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; }
+.map-tip { margin-top: 8px; color: var(--muted); font-size: 12px; }
+
+/* ---- 每日行程 ---- */
+.day-card { border: 1px solid #e8ecf4; border-radius: 12px; margin-bottom: 14px; overflow: hidden; }
+.day-head { padding: 12px 16px; background: linear-gradient(90deg, #eef1ff, #f8f9ff); font-weight: 700; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.day-head .date { color: var(--muted); font-size: 13px; font-weight: 400; }
+.day-body { padding: 14px 16px; }
+.day-desc { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+.attr-item { border-left: 3px solid var(--brand); background: #fafbff; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+.attr-item .nm { font-weight: 700; }
+.attr-item .ad { color: var(--muted); font-size: 12px; margin-top: 3px; }
+.attr-item .ds { font-size: 13px; color: #4a5568; margin-top: 5px; }
+.attr-item .meta { margin-top: 6px; display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.meals { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.meal { padding: 6px 12px; border-radius: 16px; background: #fff7ed; color: #9a3412; font-size: 12px; }
+.meal b { font-weight: 600; }
+.hotel-line { background: #e6ffed; border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-bottom: 10px; }
+
+/* ---- 天气 ---- */
+.weather-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.weather-item { background: #f8f9ff; border-radius: 10px; padding: 10px; text-align: center; }
+.weather-item .d { color: var(--muted); font-size: 12px; }
+.weather-item .wt { font-weight: 600; margin: 4px 0; }
+.weather-item .tp { color: var(--brand); font-weight: 700; }
+pre.markdown { background: #1a202c; color: #e2e8f0; border-radius: 10px; padding: 14px; font-size: 12px; white-space: pre-wrap; overflow: auto; max-height: 400px; }
+.nav-result { display: flex; gap: 10px; flex-wrap: wrap; }
+.footer-note { text-align: center; color: var(--muted); font-size: 12px; padding: 18px 0 30px; }
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">✈️ 智能旅行助手 · 结构化行程</div>
+  <nav class="links">
+    <a href="/html">问答控制台</a>
+    <a href="/history-page">历史会话</a>
+    <a href="/docs">API 文档</a>
+  </nav>
+</header>
+
+<div class="container">
+  <!-- ===================== 表单视图 ===================== -->
+  <div id="view-form">
+    <h1 class="page-title">🧳 生成我的旅行计划</h1>
+    <p class="page-sub">填好下面的偏好，AI 将为你生成可在地图上直接查看的结构化行程（所有景点经高德事实核查）。</p>
+
+    <div class="card">
+      <div class="section">
+        <div class="section-label">📍 目的地与日期</div>
+        <div class="grid">
+          <div class="c4">
+            <label class="field-label" for="city">目的地城市</label>
+            <input id="city" placeholder="例如：北京" />
+          </div>
+          <div class="c3">
+            <label class="field-label" for="start_date">开始日期</label>
+            <input type="date" id="start_date" />
+          </div>
+          <div class="c3">
+            <label class="field-label" for="end_date">结束日期</label>
+            <input type="date" id="end_date" />
+          </div>
+          <div class="c2">
+            <label class="field-label">旅行天数</label>
+            <div class="days-badge" id="days_badge">- 天</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">🚉 出发地（可选）</div>
+        <div class="grid">
+          <div class="c6">
+            <label class="field-label" for="origin">从哪个城市出发（留空则只规划目的地到达后的市内行程）</label>
+            <input id="origin" placeholder="例如：成都" />
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">🚌 交通 · 住宿</div>
+        <div class="grid">
+          <div class="c6">
+            <label class="field-label" for="transportation">交通方式</label>
+            <select id="transportation">
+              <option value="公共交通">🚇 公共交通</option>
+              <option value="自驾">🚗 自驾</option>
+              <option value="步行">🚶 步行</option>
+              <option value="混合">🔀 混合</option>
+            </select>
+          </div>
+          <div class="c6">
+            <label class="field-label" for="accommodation">住宿偏好</label>
+            <select id="accommodation">
+              <option value="经济型酒店">💰 经济型酒店</option>
+              <option value="舒适型酒店" selected>🏨 舒适型酒店</option>
+              <option value="豪华酒店">⭐ 豪华酒店</option>
+              <option value="民宿">🏡 民宿</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">🎯 旅行偏好（可多选）</div>
+        <div class="chips" id="pref_chips">
+          <span class="chip" data-v="历史文化">🏛️ 历史文化</span>
+          <span class="chip" data-v="自然风光">🏞️ 自然风光</span>
+          <span class="chip" data-v="美食">🍜 美食</span>
+          <span class="chip" data-v="购物">🛍️ 购物</span>
+          <span class="chip" data-v="艺术">🎨 艺术</span>
+          <span class="chip" data-v="休闲">☕ 休闲</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">💬 额外要求</div>
+        <textarea id="free_text" rows="3" placeholder="例如：想去看升旗、需要无障碍设施、对海鲜过敏等…"></textarea>
+      </div>
+
+      <div class="section">
+        <button class="btn btn-primary" id="btn_submit" style="width:100%;height:54px;">🚀 开始规划我的旅行</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="errbox">
+      <div class="notice err" id="errtxt"></div>
+    </div>
+  </div>
+
+  <!-- ===================== 加载视图 ===================== -->
+  <div id="view-loading" class="card hidden">
+    <div class="progress-panel">
+      <div class="spinner"></div>
+      <div class="stage-text" id="stage_text">正在启动…</div>
+      <div class="stage-sub" id="stage_sub">首次生成约需 1~4 分钟，请耐心等待</div>
+      <div class="stage-line" id="stage_line"></div>
+    </div>
+  </div>
+
+  <!-- ===================== 结果视图 ===================== -->
+  <div id="view-result" class="hidden">
+    <div class="card">
+      <div class="result-head">
+        <h2 style="margin:0;">📋 <span id="res_city">旅行计划</span></h2>
+        <div class="nav-result">
+          <button class="btn btn-ghost btn-sm" id="btn_again">🔄 重新规划</button>
+          <button class="btn btn-ghost btn-sm" id="btn_export">📄 导出文本</button>
+          <button class="btn btn-ghost btn-sm" id="btn_print">🖨️ 打印</button>
+        </div>
+      </div>
+      <div class="overview-rows">
+        <div class="info-item"><div class="k">📅 日期</div><div class="v" id="res_dates"></div></div>
+        <div class="info-item"><div class="k">🌡️ 数据保障 / 总体建议</div><div class="v" id="res_suggest"></div></div>
+      </div>
+    </div>
+
+    <div class="card hidden" id="budget_card">
+      <h2>💰 预算明细</h2>
+      <div class="budget-grid" id="budget_grid"></div>
+      <div class="budget-total"><span class="t">预估总费用</span><span class="v" id="budget_total">¥0</span></div>
+    </div>
+
+    <div class="card">
+      <h2>📍 景点地图</h2>
+      <div id="map-wrap"></div>
+      <div class="map-tip" id="map_tip"></div>
+    </div>
+
+    <div class="card">
+      <h2>📅 每日行程</h2>
+      <div id="days_root"></div>
+    </div>
+
+    <div class="card hidden" id="weather_card">
+      <h2>🌤️ 天气信息</h2>
+      <div class="weather-grid" id="weather_grid"></div>
+    </div>
+  </div>
+
+  <div class="footer-note">行程内容由 AI 生成并已通过高德 POI 事实核查，出发前请以官方实时信息为准 · Enterprise RAG Query Service</div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var STAGES = [
+    { text: "正在搜索景点", until: 0.08 },
+    { text: "正在查询天气", until: 0.16 },
+    { text: "正在推荐酒店", until: 0.24 },
+    { text: "AI 正在编排行程", until: 0.72 },
+    { text: "高德事实核查中", until: 0.92 }
+  ];
+  var plan = null;
+  var stageTimer = null;
+  var stageStart = 0;
+
+  /* ---------- 日期 & 天数 ---------- */
+  function daysBetween() {
+    var s = $("start_date").value, e = $("end_date").value;
+    if (!s || !e) return null;
+    var d1 = new Date(s), d2 = new Date(e);
+    var diff = Math.round((d2 - d1) / 86400000) + 1;
+    return (diff >= 1 && diff <= 30) ? diff : (diff > 30 ? 31 : 0);
+  }
+  function refreshDays() {
+    var d = daysBetween();
+    $("days_badge").textContent = d ? (d === 31 ? "超出 30 天" : d + " 天") : "- 天";
+  }
+  ["start_date", "end_date"].forEach(function (id) {
+    $(id).addEventListener("change", refreshDays);
+  });
+  function setDefaultDates() {
+    var t = new Date(); t.setDate(t.getDate() + 14);
+    var t2 = new Date(t); t2.setDate(t.getDate() + 2);
+    $("start_date").value = t.toISOString().slice(0, 10);
+    $("end_date").value = t2.toISOString().slice(0, 10);
+    refreshDays();
+  }
+
+  /* ---------- 偏好 chips ---------- */
+  $("pref_chips").addEventListener("click", function (e) {
+    var t = e.target;
+    if (t.classList && t.classList.contains("chip")) t.classList.toggle("on");
+  });
+  function selectedPrefs() {
+    var out = [];
+    document.querySelectorAll("#pref_chips .chip.on").forEach(function (c) { out.push(c.getAttribute("data-v")); });
+    return out;
+  }
+
+  /* ---------- 视图切换 ---------- */
+  function show(id) {
+    ["view-form", "view-loading", "view-result"].forEach(function (v) { $(v).classList.add("hidden"); });
+    $(id).classList.remove("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /* ---------- 阶段进度（长耗时同步请求的等侍动画） ---------- */
+  function startStage() {
+    stageStart = Date.now();
+    var line = $("stage_line");
+    line.innerHTML = "";
+    STAGES.forEach(function (s) {
+      var span = document.createElement("span");
+      span.className = "stage-step";
+      span.textContent = s.text;
+      line.appendChild(span);
+    });
+    updateStage();
+    stageTimer = setInterval(updateStage, 1200);
+  }
+  function updateStage() {
+    var elapsedMin = (Date.now() - stageStart) / 60000;
+    var idx = 0;
+    for (var i = 0; i < STAGES.length; i++) { if (elapsedMin >= STAGES[i].until) idx = i; }
+    var steps = document.querySelectorAll("#stage_line .stage-step");
+    steps.forEach(function (el, i) {
+      el.className = "stage-step" + (i < idx ? " done" : (i === idx ? " active" : ""));
+    });
+    $("stage_text").textContent = STAGES[idx].text + "…";
+    $("stage_sub").textContent = "已耗时约 " + Math.round(elapsedMin) + " 分钟（首次约需 1~4 分钟）";
+  }
+  function stopStage() {
+    if (stageTimer) { clearInterval(stageTimer); stageTimer = null; }
+  }
+
+  /* ---------- 提交 ---------- */
+  function errMsg(msg) {
+    $("errtxt").textContent = msg;
+    $("errbox").classList.remove("hidden");
+  }
+  $("btn_submit").addEventListener("click", async function () {
+    var city = $("city").value.trim();
+    var days = daysBetween();
+    if (!city) return errMsg("请填写目的地城市");
+    if (!days || days < 1) return errMsg("请选择有效的起止日期（1~30 天）");
+    if (days > 30) return errMsg("旅行天数不能超过 30 天");
+    var payload = {
+      city: city,
+      start_date: $("start_date").value,
+      end_date: $("end_date").value,
+      travel_days: days,
+      transportation: $("transportation").value,
+      accommodation: $("accommodation").value,
+      preferences: selectedPrefs(),
+      free_text_input: $("free_text").value.trim(),
+      origin: $("origin").value.trim()
+    };
+    $("errbox").classList.add("hidden");
+    show("view-loading");
+    startStage();
+    try {
+      var resp = await fetch("/trip/plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      var result = await resp.json();
+      if (!result.success || !result.data) {
+        stopStage(); errMsg(result.message || "生成失败，请稍后重试");
+        show("view-form"); return;
+      }
+      stopStage();
+      sessionStorage.setItem("tripPlan", JSON.stringify(result.data));
+      plan = result.data;
+      renderResult();
+    } catch (e) {
+      stopStage();
+      errMsg("请求失败：" + (e && e.message ? e.message : e) + "，请稍后重试");
+      show("view-form");
+    }
+  });
+
+  /* ---------- 结果渲染 ---------- */
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function money(v) { return "¥" + (v == null ? 0 : Number(v).toLocaleString("zh-CN")); }
+  function renderResult() {
+    show("view-result");
+    $("res_city").textContent = plan.city + "旅行计划";
+    $("res_dates").textContent = plan.start_date + " 至 " + plan.end_date + "（" + (plan.days || []).length + " 天）";
+    $("res_suggest").textContent = plan.overall_suggestions || "—";
+    renderBudget();
+    renderDays();
+    renderWeather();
+    renderMap();
+  }
+  function renderBudget() {
+    var b = plan.budget;
+    if (!b) { $("budget_card").classList.add("hidden"); return; }
+    $("budget_card").classList.remove("hidden");
+    var items = [
+      ["景点门票", b.total_attractions], ["酒店住宿", b.total_hotels],
+      ["餐饮费用", b.total_meals], ["交通费用", b.total_transportation]
+    ];
+    $("budget_grid").innerHTML = items.map(function (it) {
+      return '<div class="budget-item"><div class="bl">' + it[0] + '</div><div class="bv">' + money(it[1]) + "</div></div>";
+    }).join("");
+    $("budget_total").textContent = money(b.total);
+  }
+  function mealLabel(t) {
+    return { breakfast: "早餐", lunch: "午餐", dinner: "晚餐", snack: "加餐" }[t] || t;
+  }
+  function renderDays() {
+    var root = $("days_root");
+    var days = plan.days || [];
+    root.innerHTML = "";
+    if (!days.length) { root.innerHTML = '<div class="notice err">未生成每日行程</div>'; return; }
+    days.forEach(function (day, i) {
+      var card = document.createElement("div");
+      card.className = "day-card";
+      var head = document.createElement("div");
+      head.className = "day-head";
+      head.innerHTML = "第 " + (day.day_index + 1) + " 天 <span class='date'>" + (day.date || "") + "</span>";
+      var body = document.createElement("div");
+      body.className = "day-body";
+      var html = "";
+      if (day.description) html += '<div class="day-desc">' + esc(day.description) + "</div>";
+      if (day.hotel && day.hotel.name) {
+        html += '<div class="hotel-line">🏨 <b>住宿</b>：' + esc(day.hotel.name) +
+          (day.hotel.address ? "　" + esc(day.hotel.address) : "") +
+          (day.hotel.estimated_cost ? "　约" + money(day.hotel.estimated_cost) + "/晚" : "") + "</div>";
+      }
+      (day.attractions || []).forEach(function (a) {
+        var coord = (a.location && typeof a.location.longitude === "number")
+          ? "坐标 " + a.location.longitude.toFixed(4) + ", " + a.location.latitude.toFixed(4) : "坐标待核查";
+        html += '<div class="attr-item"><div class="nm">🏞️ ' + esc(a.name) + "</div>" +
+          '<div class="ad">' + esc(a.address || "") + "</div>" +
+          (a.description ? '<div class="ds">' + esc(a.description) + "</div>" : "") +
+          '<div class="meta"><span>' + coord + "</span>" +
+          (a.visit_duration ? "<span>建议游览 " + a.visit_duration + " 分钟</span>" : "") +
+          (a.ticket_price ? "<span>门票 " + money(a.ticket_price) + "</span>" : "") +
+          "</div></div>";
+      });
+      if ((day.meals || []).length) {
+        var meals = (day.meals || []).map(function (m) {
+          return '<span class="meal"><b>' + mealLabel(m.type) + "</b>：" + esc(m.name) +
+            (m.estimated_cost ? "（约" + m.estimated_cost + "元）" : "") + "</span>";
+        }).join("");
+        html += '<div class="meals">' + meals + "</div>";
+      }
+      body.innerHTML = html;
+      card.appendChild(head); card.appendChild(body);
+      root.appendChild(card);
+    });
+  }
+  function renderWeather() {
+    var ws = plan.weather_info || [];
+    if (!ws.length) { $("weather_card").classList.add("hidden"); return; }
+    $("weather_card").classList.remove("hidden");
+    $("weather_grid").innerHTML = ws.map(function (w) {
+      return '<div class="weather-item"><div class="d">' + (w.date || "") + '</div>' +
+        '<div class="wt">' + esc(w.day_weather || "-") + " / " + esc(w.night_weather || "-") + "</div>" +
+        '<div class="tp">' + esc(w.day_temp) + "°C / " + esc(w.night_temp) + "°C</div>" +
+        "<div>" + esc(w.wind_direction || "") + " " + esc(w.wind_power || "") + "</div></div>";
+    }).join("");
+  }
+
+  /* ---------- 地图 ---------- */
+  async function renderMap() {
+    var tip = $("map_tip");
+    tip.textContent = "正在加载地图…";
+    var attrs = [];
+    (plan.days || []).forEach(function (d) {
+      (d.attractions || []).forEach(function (a) {
+        if (a.location && typeof a.location.longitude === "number") attrs.push(a);
+      });
+    });
+    if (!attrs.length) { tip.textContent = "（行程内暂无带坐标的景点，地图不可用）"; return; }
+    var cfg;
+    try {
+      var r = await fetch("/trip/amap-js-key");
+      cfg = await r.json();
+    } catch (e) { cfg = { configured: false }; }
+    if (!cfg.configured || !cfg.key) {
+      tip.textContent = "⚠️ 未配置前端地图 Key（.env 中设置 TRIP_AMAP_JS_KEY 与 AMAP_JS_SECURITY_CODE），地图暂不可用，行程列表仍可查看。";
+      return;
+    }
+    var head = document.createElement("script");
+    head.src = "https://webapi.amap.com/loader.js";
+    head.onload = function () {
+      window._AMapSecurityConfig = { securityJsCode: cfg.securityJsCode || "" };
+      window.AMapLoader.load({ key: cfg.key, version: "2.0", plugins: ["AMap.Marker", "AMap.Polyline", "AMap.InfoWindow"] })
+        .then(function (AMap) {
+          var map = new AMap.Map("map-wrap", { zoom: 11, resizeEnable: true });
+          var colors = ["#667eea", "#e53e3e", "#38a169", "#dd6b20", "#d69e2e", "#9f7aea"];
+          (plan.days || []).forEach(function (d, dayIdx) {
+            var dayAttrs = (d.attractions || []).filter(function (a) {
+              return a.location && typeof a.location.longitude === "number";
+            });
+            if (!dayAttrs.length) return;
+            var pts = dayAttrs.map(function (a) { return [a.location.longitude, a.location.latitude]; });
+            pts.forEach(function (p, i) {
+              var a = dayAttrs[i];
+              var marker = new AMap.Marker({ position: p, offset: new AMap.Pixel(0, -30),
+                label: { content: "第" + (dayIdx + 1) + "天", direction: "top" } });
+              marker.on("click", function () {
+                var win = new AMap.InfoWindow({ content: "<div style='padding:4px 6px'><b>" + esc(a.name) + "</b><br/>" + esc(a.address || "") + "</div>", offset: new AMap.Pixel(0, -30) });
+                win.open(map, marker.getPosition());
+              });
+              map.add(marker);
+            });
+            if (pts.length > 1) {
+              var color = colors[dayIdx % colors.length];
+              map.add(new AMap.Polyline({ path: pts, strokeColor: color, strokeWeight: 5, strokeOpacity: 0.85 }));
+            }
+          });
+          map.setFitView(null, false, [60, 60, 60, 60]);
+          tip.textContent = "已标注全部景点与每日连线（同色 = 同一天行程）；点击标记可查看景点信息。";
+        })
+        .catch(function (e) { tip.textContent = "地图加载失败：" + (e && e.message ? e.message : e); });
+    };
+    document.head.appendChild(head);
+  }
+
+  /* ---------- 导出 / 打印 / 重新规划 ---------- */
+  function toMarkdown(p) {
+    var L = [];
+    L.push("# " + p.city + " " + (p.days || []).length + " 日旅行计划");
+    L.push("日期：" + p.start_date + " 至 " + p.end_date);
+    if (p.overall_suggestions) L.push("\n## 总体建议\n" + p.overall_suggestions);
+    (p.days || []).forEach(function (d) {
+      L.push("\n## 第 " + (d.day_index + 1) + " 天 " + (d.date || ""));
+      if (d.hotel && d.hotel.name) L.push("- 住宿：" + d.hotel.name);
+      (d.attractions || []).forEach(function (a) {
+        L.push("- 景点：" + a.name + (a.address ? "（" + a.address + "）" : ""));
+        if (a.description) L.push("  " + a.description);
+      });
+      (d.meals || []).forEach(function (m) { L.push("- " + mealLabel(m.type) + "：" + m.name); });
+    });
+    if ((p.weather_info || []).length) {
+      L.push("\n## 天气");
+      (p.weather_info || []).forEach(function (w) {
+        L.push("- " + w.date + "：" + w.day_weather + " " + w.day_temp + "°C / " + w.night_weather + " " + w.night_temp + "°C");
+      });
+    }
+    if (p.budget) L.push("\n## 预算\n总费用约 " + money(p.budget.total) + "（门票 " + p.budget.total_attractions + " / 酒店 " + p.budget.total_hotels + " / 餐饮 " + p.budget.total_meals + " / 交通 " + p.budget.total_transportation + "）");
+    return L.join("\n");
+  }
+  $("btn_export").addEventListener("click", function () {
+    var md = toMarkdown(plan);
+    var blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = (plan.city || "trip") + "_行程_" + plan.start_date + ".md";
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  });
+  $("btn_print").addEventListener("click", function () { window.print(); });
+  $("btn_again").addEventListener("click", function () { show("view-form"); });
+
+  /* ---------- 初始化：恢复上次行程 / 默认日期 ---------- */
+  try {
+    var saved = sessionStorage.getItem("tripPlan");
+    if (saved) { plan = JSON.parse(saved); renderResult(); }
+  } catch (e) { /* ignore */ }
+  if (!plan) setDefaultDates();
+})();
+</script>
+</body>
+</html>
+
+

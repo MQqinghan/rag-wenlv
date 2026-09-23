@@ -1,0 +1,49 @@
+<view class="container">
+  <scroll-view
+    class="msg-list"
+    scroll-y
+    scroll-into-view="{{scrollTo}}"
+    scroll-with-animation
+  >
+    <view wx:if="{{messages.length === 0}}" class="empty-tip">
+      <view class="empty-title">文旅智能问答</view>
+      <view class="empty-sub">试试问：成都三日游怎么安排？ / 故宫门票怎么预约？</view>
+    </view>
+
+    <view
+      wx:for="{{messages}}"
+      wx:key="index"
+      id="msg-{{index}}"
+      class="msg-row {{item.role}}"
+    >
+      <view class="bubble {{item.role}} {{item.error ? 'has-error' : ''}}">
+        <text user-select="{{true}}">{{item.content}}{{item.streaming && !item.content ? '思考中…' : ''}}</text>
+        <view wx:if="{{item.streaming && item.content}}" class="blink">▍</view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="input-bar">
+    <input
+      class="input"
+      value="{{input}}"
+      placeholder="问点什么…"
+      confirm-type="send"
+      disabled="{{sending}}"
+      bindinput="onInput"
+      bindconfirm="onSend"
+    />
+    <button
+      wx:if="{{!sending}}"
+      class="send-btn btn-primary"
+      size="mini"
+      bindtap="onSend"
+    >发送</button>
+    <button
+      wx:else
+      class="send-btn btn-plain"
+      size="mini"
+      bindtap="onStop"
+    >停止</button>
+  </view>
+</view>

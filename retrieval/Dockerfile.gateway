@@ -1,0 +1,39 @@
+# ==========================================================
+# 移动端 BFF 网关镜像 —— A5 部署切片（T8）
+#
+# 关键：**本进程不加载任何模型**（mobile_gateway.py 顶部定位注释），
+# 只做协议适配 + 分层防护 + 会话归属 + 转发到 query_server，
+# 因此无需 uv 全量依赖（torch/FlagEmbedding 约数 GB），仅装 4 个 Web 依赖。
+#
+# 对应：app/api/http/mobile_gateway.py，端口 8002
+#
+# 构建（项目根目录）：
+#   docker build -f Dockerfile.gateway -t rag-gateway:latest .
+# 运行（QUERY_HOST 指向 query 服务，compose 内为服务名 query）：
+#   docker run -p 8002:8002 -e QUERY_HOST=query -e QUERY_PORT=8001 rag-gateway:latest
+# ==========================================================
+FROM python:3.13-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    APP_ROLE=gateway
+
+WORKDIR /app
+
+# 网关最小依赖：fastapi/uvicorn 提供 HTTP+WS，dotenv+loguru 为 app.shared 配置与日志所需
+RUN pip install --no-cache-dir \
+    fastapi \
+    "uvicorn[standard]" \
+    python-dotenv \
+    loguru
+
+# 只拷贝需要的代码目录：app/api/http（入口）+ app/shared（配置/日志/工具）
+# 不拷贝 app/process、app/rag、app/infra，避免把重依赖模块带进镜像
+COPY app/api/http ./app/api/http
+COPY app/api/__init__.py ./app/api/__init__.py
+COPY app/shared ./app/shared
+COPY app/__init__.py ./app/__init__.py
+
+EXPOSE 8002
+
+CMD ["python", "app/api/http/mobile_gateway.py"]

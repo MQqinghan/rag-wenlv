@@ -1,0 +1,65 @@
+<Slide style={{ width: 1280, height: 720, background: '#FAF8F3' }}>
+    {/* A 区 · 标题块 */}
+    <Box style={{ height: 110, padding: '24px 64px 0 64px' }}>
+        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: '#2F6E63', letterSpacing: 3 }}>验证 · 用考试说话</Text>
+        <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 34, fontWeight: 'bold', color: '#26302C', marginTop: 8 }}>40 道考题，包括 6 道「陷阱题」</Text>
+    </Box>
+    {/* B 区 · 左巨型数字+考卷构成 / 右四轮走势 */}
+    <Box style={{ flex: 1, padding: '8px 64px 0 64px', flexDirection: 'row', gap: 40 }}>
+        <Box style={{ width: 470, paddingTop: 4 }}>
+            <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 92, fontWeight: 'bold', color: '#B5542D', lineHeight: 1.0 }}>100%</Text>
+            <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 19, fontWeight: 'bold', color: '#26302C', marginTop: 10 }}>40 道验收考题，全部通过</Text>
+            <Box style={{ flexDirection: 'column', gap: 9, marginTop: 16 }}>
+                <Box style={{ flexDirection: 'row', alignItems: 'baseline', gap: 10 }}>
+                    <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 24, fontWeight: 'bold', color: '#2F6E63' }}>32</Text>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14.5, color: '#26302C', opacity: 0.78 }}>道常规题：文旅、规划全覆盖</Text>
+                </Box>
+                <Box style={{ flexDirection: 'row', alignItems: 'baseline', gap: 10 }}>
+                    <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 24, fontWeight: 'bold', color: '#B5542D' }}>6</Text>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14.5, color: '#26302C', opacity: 0.78 }}>道陷阱题：资料里没有的，专考会不会瞎编</Text>
+                </Box>
+                <Box style={{ flexDirection: 'row', alignItems: 'baseline', gap: 10 }}>
+                    <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 24, fontWeight: 'bold', color: '#2F6E63' }}>2</Text>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14.5, color: '#26302C', opacity: 0.78 }}>道模糊题：问题不完整，专考会不会反问确认</Text>
+                </Box>
+            </Box>
+            <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14.5, color: '#26302C', opacity: 0.72, lineHeight: 1.6, marginTop: 16 }}>
+                笔试之外还有「路考」：真实导入资料、真实提问，端到端全流程实测通过。
+            </Text>
+        </Box>
+        <Box style={{ flex: 1, justifyContent: 'center' }}>
+            <svg width={560} height={224} viewBox='0 0 560 224'>
+                <line x1='40' y1='176' x2='530' y2='176' stroke='rgba(38,48,44,0.15)' strokeWidth='1.5' />
+                <polyline points='80,100 220,133 360,68 500,46' fill='none' stroke='#2F6E63' strokeWidth='2.5' />
+                <circle cx='80' cy='100' r='6' fill='#2F6E63' />
+                <circle cx='220' cy='133' r='6' fill='#2F6E63' />
+                <circle cx='360' cy='68' r='6' fill='#2F6E63' />
+                <circle cx='500' cy='46' r='8' fill='#B5542D' />
+                <circle cx='500' cy='46' r='13' fill='none' stroke='rgba(181,84,45,0.4)' strokeWidth='2' />
+                <text x='80' y='80' fontSize='15' fill='#26302C' fontWeight='bold' textAnchor='middle'>87.5%</text>
+                <text x='220' y='160' fontSize='15' fill='#26302C' fontWeight='bold' textAnchor='middle'>80.0%</text>
+                <text x='360' y='48' fontSize='15' fill='#26302C' fontWeight='bold' textAnchor='middle'>95.0%</text>
+                <text x='500' y='24' fontSize='17' fill='#B5542D' fontWeight='bold' textAnchor='middle'>100%</text>
+                <text x='80' y='198' fontSize='12.5' fill='rgba(38,48,44,0.6)' textAnchor='middle'>第一轮</text>
+                <text x='220' y='198' fontSize='12.5' fill='rgba(38,48,44,0.6)' textAnchor='middle'>第二轮</text>
+                <text x='360' y='198' fontSize='12.5' fill='rgba(38,48,44,0.6)' textAnchor='middle'>第三轮</text>
+                <text x='500' y='198' fontSize='12.5' fill='rgba(38,48,44,0.6)' textAnchor='middle'>第四轮</text>
+                <text x='246' y='122' fontSize='12.5' fill='#B5542D' textAnchor='start'>↑ 主动加严评分标准</text>
+            </svg>
+            <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 13.5, color: '#26302C', opacity: 0.72, lineHeight: 1.6, marginTop: 10 }}>
+                第二轮回落不是退步——主动加严评分，暴露并修掉了「编造答案」的毛病，换来后两轮大幅提升。
+            </Text>
+        </Box>
+    </Box>
+    {/* 判断条 */}
+    <Box style={{ margin: '16px 64px 74px 64px', borderRadius: 12, background: 'rgba(181,84,45,0.07)', padding: '14px 24px' }}>
+        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 16, color: '#26302C' }}>
+            <span style={{ fontWeight: 'bold', color: '#B5542D' }}>100% 不是终点：</span>考卷会随资料扩充持续加题，每轮迭代后复考，防止能力「退化」。
+        </Text>
+    </Box>
+    {/* C 区 · 页脚 */}
+    <Box style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: '0 64px' }}>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>文旅智能问答助手</Text>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>09 / 10</Text>
+    </Box>
+</Slide>

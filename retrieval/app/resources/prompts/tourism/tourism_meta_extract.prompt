@@ -1,0 +1,38 @@
+你是文旅知识库的元数据抽取专家。请根据文件名和正文内容，抽取结构化元数据。
+
+文件名：{file_title}
+
+正文内容：
+{context}
+
+一、内容类型（content_type）从以下 12 类中选择 1 类：
+景点信息 / 景区介绍 / 文化知识介绍 / 游记攻略 / 推荐运营资料 / 游客评论摘要 / 常见问答 / 运营表格 / 线路推荐 / 酒店信息 / 美食推荐 / 交通指南
+
+二、类型专属字段（extra）的填写规则：
+extra 是一个 JSON 对象，键名必须取自下表"该类型对应的英文字段名"，键值来自原文；原文没有对应信息的字段就【省略该键，不要填 null】；禁止出现该类型以外的键。
+
+- 景点信息、景区介绍：attraction_name(景点名), level(等级), ticket_price(门票), open_time(开放时间), best_season(最佳季节), visit_duration(游览时长), transportation(交通), nearby_facilities(周边设施)
+- 文化知识介绍：theme(主题), culture_category(文化类别), period(历史时期), summary(摘要≤200字), related_attractions(关联景点，数组)
+- 游记攻略：author(作者), route(路线), attractions(景点数组), budget(预算), travel_time(出行时间), tips(贴士)
+- 线路推荐：route_name(线路名), days(天数), itinerary(行程安排), attractions(途经景点数组), transportation(交通), budget(价格), tips(贴士)
+- 酒店信息：hotel_name(酒店名), star_level(星级), price_range(价格区间), location(位置), facilities(设施), nearby_attractions(周边景点数组), tips(贴士)
+- 美食推荐：restaurant_name(店名), cuisine(菜系), signature_dishes(招牌菜数组), price_range(人均), location(位置), opening_hours(营业时间), tips(贴士)
+- 交通指南：traffic_mode(交通方式), route_desc(路线), duration(耗时), cost(费用), schedule(班次), tips(贴士)
+- 推荐运营资料 / 游客评论摘要 / 常见问答 / 运营表格：extra 固定为空对象 {{}}
+
+注意：extra 的键名严格使用上表英文字段名，禁止把说明文字（如"仅根据 content_type 填对应类型的字段"）当作键名输出。
+
+请输出一个 JSON 对象（不要输出任何解释、不要用 markdown 代码块包裹），字段结构如下：
+{{
+  "item_name": "主体名。景点/景区类填景点全名；文化知识类填知识主题（如'北欧文化'、'傣族泼水节'）；游记类填游记标题；线路推荐类填线路名；酒店类填酒店名；美食类填店名/美食名；交通类填出行主题（如'杭州交通指南'）。无法判断填空字符串。",
+  "content_type": "从上述 12 类枚举中选一个",
+  "region": "所属地区，如'陕西西安'、'云南西双版纳'；文化知识可填国家/地区/民族范围，如'北欧'、'傣族'。没有则填空字符串",
+  "cultural_theme": "文化主题，仅当内容涉及文化介绍时填写，如'非遗剪纸'、'唐宋建筑'。否则填空字符串",
+  "category": "类别标签，如'自然风光/历史古迹/亲子/红色旅游/民俗文化'。没有则填空字符串",
+  "extra": {{}}
+}}
+
+注意：
+1. 用户可能上传与旅游无直接关联的纯文化资料（如"北欧文化有什么特点"的介绍文档），此时 content_type 必须选"文化知识介绍"，正常抽取，不要强行归类为景点资料。
+2. extra 必须是 JSON 对象，键名用上表英文，键值用原文中的中文内容，严禁编造。示例：content_type=景点信息 时 extra 形如 {{"attraction_name":"西湖","level":"5A","ticket_price":"免费"}}。
+3. 只输出 JSON 本身。

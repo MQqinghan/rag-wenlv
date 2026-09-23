@@ -1,0 +1,63 @@
+<Slide style={{ width: 1280, height: 720, background: '#FAF8F3' }}>
+    {/* A 区 · 标题块 */}
+    <Box style={{ height: 110, padding: '24px 64px 0 64px' }}>
+        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: '#2F6E63', letterSpacing: 3 }}>实现 · 核心能力一</Text>
+        <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 34, fontWeight: 'bold', color: '#26302C', marginTop: 8 }}>第一道闸门：先听懂，再回答</Text>
+    </Box>
+    {/* B 区 · 左三岔口图 55% / 右例句 45% */}
+    <Box style={{ flex: 1, padding: '8px 64px 74px 64px', flexDirection: 'row', gap: 30 }}>
+        <Box style={{ width: 580, justifyContent: 'center', alignItems: 'center' }}>
+            <svg width={560} height={396} viewBox='0 0 560 396'>
+                <rect x='190' y='16' width='180' height='48' rx='10' fill='#2F6E63' />
+                <text x='280' y='47' fontSize='17' fill='#FAF8F3' fontWeight='bold' textAnchor='middle'>你的问题</text>
+                <line x1='280' y1='64' x2='280' y2='104' stroke='rgba(38,48,44,0.35)' strokeWidth='2' />
+                <rect x='165' y='104' width='230' height='52' rx='10' fill='rgba(47,110,99,0.1)' stroke='#2F6E63' strokeWidth='1.5' />
+                <text x='280' y='137' fontSize='16' fill='#2F6E63' fontWeight='bold' textAnchor='middle'>分诊台 · 听懂来意</text>
+                <line x1='280' y1='156' x2='95' y2='246' stroke='rgba(38,48,44,0.3)' strokeWidth='2' />
+                <line x1='280' y1='156' x2='280' y2='246' stroke='rgba(38,48,44,0.3)' strokeWidth='2' />
+                <line x1='280' y1='156' x2='465' y2='246' stroke='rgba(38,48,44,0.3)' strokeWidth='2' />
+                <rect x='20' y='246' width='150' height='46' rx='10' fill='rgba(47,110,99,0.08)' stroke='rgba(47,110,99,0.4)' strokeWidth='1' />
+                <text x='95' y='275' fontSize='15' fill='#26302C' fontWeight='bold' textAnchor='middle'>行程规划</text>
+                <rect x='205' y='246' width='150' height='46' rx='10' fill='rgba(47,110,99,0.08)' stroke='rgba(47,110,99,0.4)' strokeWidth='1' />
+                <text x='280' y='275' fontSize='15' fill='#26302C' fontWeight='bold' textAnchor='middle'>文旅通道</text>
+                <rect x='390' y='246' width='150' height='46' rx='10' fill='rgba(47,110,99,0.08)' stroke='rgba(47,110,99,0.4)' strokeWidth='1' />
+                <text x='465' y='275' fontSize='15' fill='#26302C' fontWeight='bold' textAnchor='middle'>闲聊通道</text>
+                <line x1='280' y1='292' x2='280' y2='316' stroke='rgba(181,84,45,0.6)' strokeWidth='2' strokeDasharray='4 4' />
+                <rect x='178' y='316' width='204' height='40' rx='20' fill='#B5542D' />
+                <text x='280' y='342' fontSize='14' fill='#FAF8F3' fontWeight='bold' textAnchor='middle'>再亮「规划灯」：要安排行程</text>
+                <text x='280' y='386' fontSize='13' fill='rgba(38,48,44,0.55)' textAnchor='middle'>先按经验规则快速分流，拿不准再请 AI 模型把关</text>
+            </svg>
+        </Box>
+        <Box style={{ flex: 1, flexDirection: 'column', gap: 13 }}>
+            <Box style={{ background: 'rgba(47,110,99,0.06)', borderRadius: 12, padding: '12px 18px' }}>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 16, color: '#26302C' }}>"杭州三日游怎么安排最合理？"</Text>
+                <Text style={{ fontSize: 13, color: '#2F6E63', fontWeight: 'bold', marginTop: 4 }}>→ 行程规划</Text>
+            </Box>
+            <Box style={{ background: 'rgba(47,110,99,0.06)', borderRadius: 12, padding: '12px 18px', marginLeft: 26 }}>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 16, color: '#26302C' }}>"泰山看日出几点最合适？门票多少钱？"</Text>
+                <Text style={{ fontSize: 13, color: '#2F6E63', fontWeight: 'bold', marginTop: 4 }}>→ 文旅通道</Text>
+            </Box>
+            <Box style={{ background: 'rgba(47,110,99,0.06)', borderRadius: 12, padding: '12px 18px' }}>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 16, color: '#26302C' }}>"你是谁呀？"</Text>
+                <Text style={{ fontSize: 13, color: '#2F6E63', fontWeight: 'bold', marginTop: 4 }}>→ 闲聊通道</Text>
+            </Box>
+            <Box style={{ background: 'rgba(181,84,45,0.07)', border: '1px solid rgba(181,84,45,0.45)', borderRadius: 12, padding: '12px 18px', marginLeft: 26 }}>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 16, color: '#26302C' }}>"帮我安排一次从武汉出发的三日游"</Text>
+                <Text style={{ fontSize: 13, color: '#B5542D', fontWeight: 'bold', marginTop: 4 }}>→ 文旅通道 · 亮起规划灯（触发行程助手）</Text>
+            </Box>
+            <Box style={{ background: 'rgba(47,110,99,0.05)', borderRadius: 10, padding: '12px 18px', marginTop: 4 }}>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14.5, color: '#26302C', opacity: 0.8, lineHeight: 1.55 }}>
+                    <span style={{ fontWeight: 'bold' }}>听不懂？不硬答。</span>反问一句确认：「您想问景点介绍，还是行程安排？」
+                </Text>
+            </Box>
+            <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 15, color: '#2F6E63', fontWeight: 'bold', lineHeight: 1.55, marginTop: 4 }}>
+                分得准，后面才答得对——这是整个系统的第一道闸门。
+            </Text>
+        </Box>
+    </Box>
+    {/* C 区 · 页脚 */}
+    <Box style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: '0 64px' }}>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>文旅智能问答助手</Text>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>05 / 10</Text>
+    </Box>
+</Slide>

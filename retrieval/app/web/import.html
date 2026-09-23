@@ -1,0 +1,1712 @@
+<!-- 导入演示页面，用于上传文档并观察导入状态。 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>翰墨阁 · 典籍录入</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico">
+    <!-- 古风字体：马善政毛笔楷书做标题，Noto Serif SC 衬线宋体做正文 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;500;700;900&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+    <style>
+        /* ========== 古风变量（经典宣纸主题；body.ink-*.css 切换见 :root.ink-theme） ========== */
+        :root {
+            --xuan-paper: #f5e8c7;       /* 宣纸米黄 */
+            --xuan-light: #fdf6e3;      /* 浅宣纸 */
+            --mo-black: #1a1a1a;        /* 浓墨 */
+            --mo-dark: #2c2c2c;         /* 重墨 */
+            --mo-mid: #4a3c2c;          /* 老墨 */
+            --zhu-red: #b22222;         /* 朱砂红 */
+            --zhu-bright: #c0392b;      /* 朱砂亮 */
+            --qing-green: #4a7c59;     /* 青绿 */
+            --an-gold: #b8860b;         /* 暗金 */
+            --yin-gray: #6b6b6b;        /* 银灰 */
+
+            /* ---- 背景（body 底图 + 蒙层两色） ---- */
+            --bg-url: url('/preview.jpg');
+            --body-ov1: rgba(245, 232, 199, 0.72);
+            --body-ov2: rgba(253, 246, 227, 0.78);
+
+            /* ---- 半透明面板 / 卡片 / 控件底色（两主题各自取值） ---- */
+            --panel-bg: rgba(253, 246, 227, 0.94);   /* 主容器纸面 */
+            --panel-soft: rgba(245, 232, 199, 0.35); /* 管理面板底 */
+            --card-bg: rgba(253, 246, 227, 0.88);    /* 文件卡片 */
+            --upload-bg: rgba(245, 232, 199, 0.45);  /* 上传区 */
+            --upload-hover: rgba(232, 215, 175, 0.65);
+            --drag-bg: #f3e8c8;                      /* 拖拽悬停高亮 */
+            --selector-bg: rgba(245, 232, 199, 0.55);/* 业务选择条 */
+            --select-bg: rgba(253, 246, 227, 0.85);  /* select 底 */
+            --list-bg: rgba(253, 246, 227, 0.75);    /* 文件列表底 */
+            --task-empty-bg: rgba(245, 232, 199, 0.3);
+            --guard-bg: rgba(74, 60, 44, 0.06);
+            --row-line: rgba(74, 60, 44, 0.12);      /* 列表行分隔线 */
+            --list-line: rgba(74, 60, 44, 0.25);     /* 列表外框线 */
+            --bar-track: rgba(74, 60, 44, 0.18);     /* 进度条槽 */
+            --axis-gradient: linear-gradient(180deg,
+                #3e3122 0%, #6b5335 28%, #a98e5f 50%, #6b5335 72%, #3e3122 100%);
+            --shadow-color: rgba(74, 60, 44, 0.22);
+
+            /* ---- 状态徽章 / 进度条（两主题各自取值） ---- */
+            --badge-doing: var(--an-gold);           /* 上传中 / 待确认 */
+            --badge-done: var(--zhu-red);            /* 已完成 */
+            --badge-error: #5d2a2a;                  /* 失败 */
+            --progress-doing: var(--zhu-bright);     /* 进行中进度 */
+            --progress-done: var(--qing-green);      /* 完成进度 */
+            --domain-badge-tour-bg: rgba(74, 124, 89, 0.12);   /* 文旅域徽章淡底 */
+        }
+
+        /* ========== 水墨主题：主色白、墨辅助、赤点缀、少量青 ========== */
+        :root.ink-theme {
+            --xuan-paper: #f7f6f3;
+            --xuan-light: #ffffff;
+            --mo-black: #1f1f1f;
+            --mo-dark: #303030;
+            --mo-mid: #55565a;
+            --zhu-red: #9e2b25;          /* 沉稳朱砂 */
+            --zhu-bright: #b5382f;
+            --qing-green: #4a6b7c;       /* 青灰 */
+            --an-gold: #7a7a70;          /* 淡墨代替暗金 */
+            --yin-gray: #8b8b88;
+
+            --bg-url: url('/ink-import.webp');
+            --body-ov1: rgba(255, 255, 255, 0.60);
+            --body-ov2: rgba(250, 250, 248, 0.70);
+
+            --panel-bg: rgba(255, 255, 255, 0.93);
+            --panel-soft: rgba(255, 255, 255, 0.45);
+            --card-bg: rgba(255, 255, 255, 0.86);
+            --upload-bg: rgba(255, 255, 255, 0.55);
+            --upload-hover: rgba(244, 246, 247, 0.85);
+            --drag-bg: rgba(233, 240, 243, 0.9);
+            --selector-bg: rgba(255, 255, 255, 0.6);
+            --select-bg: rgba(255, 255, 255, 0.92);
+            --list-bg: rgba(255, 255, 255, 0.82);
+            --task-empty-bg: rgba(255, 255, 255, 0.4);
+            --guard-bg: rgba(31, 31, 31, 0.04);
+            --row-line: rgba(31, 31, 31, 0.10);
+            --list-line: rgba(31, 31, 31, 0.18);
+            --bar-track: rgba(31, 31, 31, 0.10);
+            --axis-gradient: linear-gradient(180deg,
+                #232326 0%, #4a4a50 28%, #7d7d84 50%, #4a4a50 72%, #232326 100%);
+            --shadow-color: rgba(31, 31, 31, 0.16);
+
+            --badge-doing: #6e6e6a;
+            --badge-done: var(--zhu-red);
+            --badge-error: #414141;
+            --progress-doing: var(--zhu-bright);
+            --progress-done: var(--qing-green);
+            --domain-badge-tour-bg: rgba(74, 107, 124, 0.12);
+        }
+
+        body {
+            font-family: 'Noto Serif SC', '宋体', serif;
+            /* 底图做背景,叠加半透明蒙层呈现纸面感（经典=宣纸米黄蒙层,水墨=白蒙层透山水） */
+            background-image:
+                linear-gradient(var(--body-ov1), var(--body-ov2)),
+                var(--bg-url);
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: var(--mo-dark);
+            margin: 0;
+            padding: 24px 16px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* 卷轴容器:宣纸底+墨色双线边框+印泥红角饰（加宽以容纳左右两栏） */
+        .container {
+            width: 100%;
+            max-width: 1240px;
+            background-color: var(--panel-bg);
+            backdrop-filter: blur(4px);
+            padding: 40px 38px 32px;
+            border: 1px solid var(--mo-mid);
+            border-radius: 4px;
+            box-shadow:
+                0 0 0 6px var(--xuan-light),
+                0 0 0 7px var(--mo-mid),
+                0 10px 32px var(--shadow-color);
+            position: relative;
+        }
+
+        /* 三栏布局：左=册架导航（已导入文件，可隐藏） / 中=业务选择与上传 / 右=导入任务；窄屏自动回落单栏 */
+        .layout {
+            display: flex;
+            gap: 24px;
+            align-items: stretch;   /* 两栏拉伸等高：中栏上传区撑满后与右栏底对齐 */
+        }
+        /* 左侧册架导航栏：经左缘"册府"手柄收起（flex-basis 收缩 + 淡出），状态存 localStorage */
+        .col-nav {
+            flex: 0 0 300px;
+            min-width: 0;
+            overflow: hidden;
+            transition: flex-basis 0.45s ease, margin-left 0.45s ease, opacity 0.35s ease;
+        }
+        .layout.nav-hidden .col-nav {
+            flex-basis: 0;
+            margin-left: -24px;   /* 抵消 gap，收起后不留空位 */
+            opacity: 0;
+            pointer-events: none;
+        }
+        .col-mid {
+            flex: 1 1 auto;
+            min-width: 0;
+            display: flex;              /* 纵向弹性列：业务条 + 上传区（flex:1 撑满等高） */
+            flex-direction: column;
+        }
+        .col-right {
+            flex: 0 0 336px;
+            position: sticky; top: 0;
+        }
+        @media (max-width: 1080px) {
+            .layout { flex-direction: column; }
+            .col-nav { flex: none; width: 100%; }
+            .layout.nav-hidden .col-nav { display: none; margin-left: 0; }
+            .col-right { flex: none; width: 100%; position: static; }
+        }
+        /* 册架收放手柄：嵌在容器左立柱上的"轴钉"，点击抽拉册架 */
+        .nav-handle {
+            position: absolute;
+            left: -33px;
+            top: 44px;
+            z-index: 5;
+            width: 24px;
+            height: 66px;
+            padding: 0;
+            border: none;
+            border-radius: 3px;
+            background: var(--axis-gradient);
+            box-shadow: 0 1px 4px rgba(26, 26, 26, 0.3);
+            color: var(--xuan-light);
+            font-family: 'Ma Shan Zheng', 'KaiTi', cursive;
+            font-size: 15px;
+            line-height: 24px;
+            writing-mode: vertical-rl;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+        }
+        .nav-handle:hover { transform: scale(1.06); filter: brightness(1.15); }
+        /* 窄屏手柄挪位：必须位于桌面 .nav-handle 规则之后，同特异性下后者才会被覆盖（曾因写在前面而失效） */
+        @media (max-width: 1080px) {
+            .nav-handle { left: 8px; top: 8px; }
+        }
+        /* 卷轴展开动画：面板展开时 1.2s 内如卷轴般完全展开（max-height 从 0 过渡到全量） */
+        @keyframes scroll-unroll {
+            from { max-height: 0; opacity: 0.4; }
+            to   { max-height: 640px; opacity: 1; }
+        }
+        .manage-panel[open] .manage-inner {
+            position: relative;
+            overflow: hidden;
+            animation: scroll-unroll 1.2s ease-in-out;
+        }
+        /* 卷轴形制：上下两根横向轴杆常驻（收起时是一卷收拢的短卷轴，展开时随纸面撑开），
+           两端略伸出纸面；纸面与背景之间加浅投影增强立体感 */
+        .manage-panel {
+            position: relative;
+            box-shadow: 0 3px 10px rgba(26, 26, 26, 0.14), 0 1px 3px rgba(26, 26, 26, 0.10);
+        }
+        .manage-panel::before,
+        .manage-panel::after {
+            content: "";
+            position: absolute;
+            left: -8px;
+            right: -8px;
+            height: 10px;
+            border-radius: 5px;
+            background: var(--axis-gradient);
+            box-shadow: 0 1px 4px rgba(26, 26, 26, 0.25);
+            pointer-events: none;
+            z-index: 1;
+        }
+        .manage-panel::before { top: -5px; }
+        .manage-panel::after { bottom: -5px; }
+        .task-count {
+            font-size: 12px;
+            color: var(--yin-gray);
+            font-weight: 400;
+            letter-spacing: 1px;
+            margin-left: 8px;
+        }
+        /* 任务面板 summary 横排：标题 + 计数 + 右缘"删除记录" */
+        .task-panel summary { display: flex; align-items: center; }
+        /* 右栏"删除记录"：仅清空本页任务列表显示，不动数据库与已入库数据 */
+        .btn-clear-tasks {
+            margin-left: auto;
+            cursor: pointer;
+            border: 1px solid var(--mo-black);
+            border-radius: 1px;
+            background-color: transparent;
+            color: var(--zhu-red);
+            font-family: 'Noto Serif SC', 'KaiTi', serif;
+            font-size: 12px;
+            letter-spacing: 2px;
+            padding: 2px 10px;
+            white-space: nowrap;
+        }
+        .btn-clear-tasks:hover {
+            background-color: var(--zhu-red);
+            color: var(--xuan-light);
+        }
+        /* 右栏导入任务面板：固定高度的下拉卷轴，内部滚动 */
+        .task-panel { margin-top: 0; }
+        .task-inner { padding: 10px 14px 14px; }
+        .task-inner .file-list.task-list-fixed {
+            height: 430px;          /* 固定高度：任务多少都不改变面板外形 */
+            overflow-y: auto;
+            margin-top: 0;
+        }
+        .task-empty {
+            color: var(--yin-gray);
+            font-size: 13px;
+            font-family: 'Noto Serif SC', serif;
+            text-align: center;
+            padding: 30px 10px;
+            border: 1px dashed var(--list-line);
+            border-radius: 2px;
+            background: var(--task-empty-bg);
+        }
+        /* 卷轴左右立柱装饰 */
+        .container::before,
+        .container::after {
+            content: "";
+            position: absolute;
+            top: -6px;
+            bottom: -6px;
+            width: 14px;
+            background: var(--axis-gradient);
+            border-radius: 2px;
+        }
+        .container::before { left: -22px; }
+        .container::after { right: -22px; }
+
+        /* 标题:毛笔楷书+朱砂红印章 */
+        h1 {
+            font-family: 'Ma Shan Zheng', 'KaiTi', '楷体', cursive;
+            color: var(--mo-black);
+            text-align: center;
+            font-size: 38px;
+            font-weight: 400;
+            letter-spacing: 6px;
+            margin: 0 0 8px;
+            text-shadow: 1px 1px 0 rgba(178, 34, 34, 0.08);
+        }
+        .subtitle {
+            text-align: center;
+            font-family: 'ZCOOL XiaoWei', 'KaiTi', serif;
+            color: var(--mo-mid);
+            font-size: 14px;
+            letter-spacing: 4px;
+            margin-bottom: 28px;
+            border-bottom: 1px dashed var(--an-gold);
+            padding-bottom: 16px;
+        }
+        .subtitle::before,
+        .subtitle::after {
+            content: "❀";
+            color: var(--zhu-red);
+            margin: 0 12px;
+            opacity: 0.6;
+        }
+
+        /* 业务选择:仿竹简横向条 */
+        .domain-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 22px;
+            background: var(--selector-bg);
+            border: 1px solid var(--mo-mid);
+            border-left: 4px solid var(--zhu-red);
+            border-radius: 2px;
+            padding: 12px 16px;
+            font-family: 'ZCOOL XiaoWei', 'KaiTi', serif;
+        }
+        .domain-selector label {
+            font-size: 15px;
+            color: var(--mo-black);
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+        .domain-selector select {
+            padding: 6px 12px;
+            border-radius: 2px;
+            border: 1px solid var(--mo-mid);
+            background: var(--select-bg);
+            font-family: 'Noto Serif SC', serif;
+            font-size: 14px;
+            color: var(--mo-dark);
+            cursor: pointer;
+        }
+        .domain-hint {
+            font-size: 12px;
+            color: var(--yin-gray);
+            font-style: italic;
+            margin-left: auto;
+        }
+        .content-type-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .content-type-wrap label {
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+
+        /* 上传区:仿奏折/卷册封面 */
+        .upload-area {
+            border: 2px dashed var(--mo-mid);
+            border-radius: 2px;
+            background-color: var(--upload-bg);
+            padding: 42px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+            position: relative;
+            flex: 1 1 auto;             /* 撑满中栏剩余高度，与右栏底对齐（拖拽热区也更大） */
+            min-height: 190px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .upload-area::before {
+            content: "册";
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            font-family: 'Ma Shan Zheng', 'KaiTi', cursive;
+            font-size: 22px;
+            color: var(--zhu-red);
+            opacity: 0.45;
+        }
+        .upload-area::after {
+            content: "印";
+            position: absolute;
+            bottom: 8px;
+            right: 14px;
+            font-family: 'Ma Shan Zheng', 'KaiTi', cursive;
+            font-size: 22px;
+            color: var(--zhu-red);
+            opacity: 0.45;
+        }
+        .upload-area:hover {
+            background-color: var(--upload-hover);
+            border-color: var(--zhu-red);
+        }
+        /* 拖拽悬停高亮（JS 用 class 控制，颜色随主题走） */
+        .upload-area.drag-over {
+            background-color: var(--drag-bg);
+            border-color: var(--zhu-red);
+        }
+        .upload-icon {
+            font-size: 52px;
+            color: var(--zhu-red);
+            margin-bottom: 10px;
+            font-family: 'Ma Shan Zheng', cursive;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .upload-area p {
+            font-family: 'ZCOOL XiaoWei', 'KaiTi', serif;
+            color: var(--mo-dark);
+            margin: 6px 0 0;
+            letter-spacing: 2px;
+            font-size: 15px;
+        }
+        .file-input { display: none; }
+
+        /* 按钮:仿朱砂印泥方章 */
+        .btn {
+            background-color: var(--zhu-red);
+            color: var(--xuan-light);
+            border: 1px solid var(--mo-black);
+            padding: 9px 22px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-family: 'ZCOOL XiaoWei', 'KaiTi', serif;
+            font-size: 15px;
+            letter-spacing: 4px;
+            box-shadow: 1px 1px 0 var(--mo-black);
+            transition: transform 0.15s, background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: var(--zhu-bright);
+            transform: translate(1px, 1px);
+            box-shadow: 0 0 0 var(--mo-black);
+        }
+        .btn:disabled {
+            background-color: var(--yin-gray);
+            cursor: not-allowed;
+        }
+
+        /* 文件列表 */
+        .file-list { margin-top: 26px; }
+        .file-item {
+            background-color: var(--card-bg);
+            border: 1px solid var(--mo-mid);
+            border-left: 4px solid var(--qing-green);
+            border-radius: 2px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            margin-right: 18px;
+        }
+        .file-name {
+            font-weight: 700;
+            color: var(--mo-black);
+            font-family: 'Noto Serif SC', serif;
+            letter-spacing: 1px;
+        }
+        .file-size {
+            font-size: 12px;
+            color: var(--yin-gray);
+            margin-top: 4px;
+            font-family: 'ZCOOL XiaoWei', serif;
+        }
+
+        /* 状态徽章:仿印章方框 */
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 1px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--xuan-light);
+            min-width: 76px;
+            text-align: center;
+            font-family: 'ZCOOL XiaoWei', 'KaiTi', serif;
+            letter-spacing: 2px;
+            border: 1px solid var(--mo-black);
+        }
+        .status-uploading  { background-color: var(--badge-doing); }
+        .status-processing { background-color: var(--qing-green); }
+        .status-blocked    { background-color: var(--badge-doing); }
+        .status-completed  { background-color: var(--badge-done); }
+        .status-error      { background-color: var(--badge-error); }
+
+        /* 进度条:墨色细线 */
+        .progress-bar-container {
+            width: 100%;
+            height: 4px;
+            background-color: var(--bar-track);
+            margin-top: 8px;
+            border-radius: 0;
+            overflow: hidden;
+            display: none;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: var(--progress-doing);
+            width: 0%;
+            transition: width 0.3s, background-color 0.3s;
+        }
+
+        /* 日志 */
+        .log-details {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--mo-mid);
+            font-family: 'Noto Serif SC', serif;
+        }
+        .log-details summary {
+            cursor: pointer;
+            user-select: none;
+            color: var(--mo-mid);
+            letter-spacing: 1px;
+        }
+        .log-list {
+            margin: 6px 0 0 18px;
+            padding: 0;
+        }
+        .log-list li {
+            margin: 2px 0;
+            line-height: 1.6;
+        }
+
+        /* 领域预检挂起提示区（疑似误导 → 原因 + 强制导入/取消） */
+        .guard-box {
+            margin-top: 10px;
+            padding: 8px 10px;
+            background: var(--guard-bg);
+            border: 1px dashed var(--mo-mid);
+            border-radius: 2px;
+        }
+        .guard-msg {
+            font-size: 12px;
+            color: var(--mo-dark);
+            line-height: 1.7;
+        }
+        .guard-actions {
+            margin-top: 8px;
+        }
+        .btn-guard {
+            cursor: pointer;
+            font-family: 'ZCOOL XiaoWei', 'KaiTi', serif;
+            font-size: 13px;
+            letter-spacing: 2px;
+            padding: 4px 14px;
+            margin-right: 10px;
+            border: 1px solid var(--mo-black);
+            border-radius: 1px;
+            transition: opacity 0.15s;
+        }
+        .btn-guard-run {
+            background-color: var(--zhu-red);
+            color: var(--xuan-light);
+        }
+        .btn-guard-cancel {
+            background-color: transparent;
+            color: var(--mo-dark);
+        }
+        .btn-guard:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 业务徽章 */
+        .domain-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border: 1px solid var(--mo-black);
+            border-radius: 1px;
+            margin-left: 8px;
+            vertical-align: 1px;
+            font-family: 'ZCOOL XiaoWei', 'KaiTi', serif;
+            letter-spacing: 2px;
+        }
+        .domain-badge.tourism {
+            background: var(--domain-badge-tour-bg);
+            color: var(--qing-green);
+        }
+
+        /* 已导入文件管理面板（列出 + 撤回）：无边框纸面，卷轴感由左右轴杆承担 */
+        .manage-panel {
+            margin-top: 0;
+            border-radius: 2px;
+            background: var(--panel-soft);
+            padding: 4px 0;
+        }
+        .manage-panel summary {
+            cursor: pointer;
+            padding: 8px 16px;
+            /* Noto Serif SC 字库完整、小字加粗下笔画清晰（ZCOOL XiaoWei 的"回"字会糊） */
+            font-family: 'Noto Serif SC', 'KaiTi', serif;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--mo-dark);
+            user-select: none;
+            list-style: none;
+        }
+        .manage-panel summary::-webkit-details-marker { display: none; }
+        .manage-panel summary::before { content: '▸ '; color: var(--zhu-red); }
+        .manage-panel[open] summary::before { content: '▾ '; }
+        .manage-inner { padding: 2px 16px 16px; }
+
+        /* ===== 外发记录面板（A2 审计）：只读展示 logs/egress_audit.jsonl 尾部 ===== */
+        #egressPanel { margin-top: 12px; }
+        #egressPanel summary { display: flex; align-items: center; }
+        .egress-mode-tag {
+            margin-left: auto;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 12px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            color: var(--mo-mid);
+            border: 1px solid var(--mo-mid);
+            border-radius: 8px;
+            padding: 0 8px;
+        }
+        .egress-mode-tag.egress-off { color: var(--badge-error); border-color: var(--badge-error); }
+        .egress-wrap { font-size: 12px; color: var(--mo-dark); }
+        .egress-empty {
+            padding: 10px 2px;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 13px;
+            letter-spacing: 1px;
+            opacity: 0.65;
+        }
+        .egress-list { max-height: 200px; overflow-y: auto; padding-right: 4px; }
+        .egress-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 3px 0;
+            border-bottom: 1px dashed var(--mo-mid);
+            font-family: 'Noto Serif SC', serif;
+        }
+        .egress-row .e-ts { flex: none; opacity: 0.75; }
+        .egress-row .e-main {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .egress-row .e-badge {
+            flex: none;
+            font-size: 11px;
+            padding: 1px 6px;
+            border-radius: 8px;
+        }
+        .e-badge.e-ok { color: var(--qing-green); border: 1px solid var(--qing-green); }
+        .e-badge.e-error { color: var(--badge-error); border: 1px solid var(--badge-error); }
+        .e-badge.e-blocked { color: var(--badge-doing); border: 1px solid var(--badge-doing); }
+        .manage-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 13px;
+            color: var(--mo-dark);
+        }
+        .manage-toolbar select {
+            padding: 4px 8px;
+            border: 1px solid var(--mo-mid);
+            border-radius: 1px;
+            background: var(--xuan-light);
+            color: var(--mo-dark);
+            font-family: 'ZCOOL XiaoWei', 'KaiTi', serif;
+            font-size: 13px;
+        }
+        .manage-toolbar .manage-search {
+            flex: 1;
+            min-width: 120px;
+            padding: 5px 10px;
+            border: 1px solid var(--mo-mid);
+            border-radius: 1px;
+            background: var(--xuan-light);
+            color: var(--mo-dark);
+            font-family: 'Noto Serif SC', serif;
+            font-size: 13px;
+            outline: none;
+        }
+        .manage-toolbar .manage-search:focus {
+            border-color: var(--zhu-red);
+        }
+        .btn-mgmt {
+            cursor: pointer;
+            border: 1px solid var(--mo-black);
+            border-radius: 1px;
+            background-color: var(--zhu-red);
+            color: var(--xuan-light);
+            font-family: 'ZCOOL XiaoWei', 'KaiTi', serif;
+            font-size: 13px;
+            letter-spacing: 2px;
+            padding: 4px 14px;
+        }
+        .btn-mgmt:hover { opacity: 0.85; }
+        .manage-summary {
+            color: var(--yin-gray);
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        /* 批量撤回：全选标签 / 复选框 / 按钮禁用态 */
+        .mgmt-select-all {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+            user-select: none;
+        }
+        .manage-toolbar input[type="checkbox"],
+        .manage-row .mgmt-check {
+            accent-color: var(--zhu-red);
+            cursor: pointer;
+        }
+        .manage-row .mgmt-check { flex: none; }
+        .btn-mgmt:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        .manage-list {
+            max-height: 300px;
+            overflow: auto;
+            border: 1px solid var(--list-line);
+            border-radius: 2px;
+            background: var(--list-bg);
+        }
+        .manage-empty {
+            padding: 16px;
+            color: var(--yin-gray);
+            text-align: center;
+            font-size: 13px;
+            font-family: 'Noto Serif SC', serif;
+        }
+        .manage-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--row-line);
+            font-size: 13px;
+        }
+        .manage-row:last-child { border-bottom: none; }
+        .manage-name {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--mo-dark);
+            font-family: 'Noto Serif SC', serif;
+        }
+        .manage-counts {
+            color: var(--yin-gray);
+            font-size: 12px;
+            white-space: nowrap;
+            font-family: 'Noto Serif SC', serif;
+        }
+        .btn-revoke {
+            cursor: pointer;
+            border: 1px solid var(--mo-black);
+            border-radius: 1px;
+            background-color: transparent;
+            color: var(--zhu-red);
+            /* 同 summary：换思源宋体，保证"撤回"二字清晰 */
+            font-family: 'Noto Serif SC', 'KaiTi', serif;
+            font-size: 12px;
+            letter-spacing: 2px;
+            padding: 2px 10px;
+            white-space: nowrap;
+        }
+        .btn-revoke:hover {
+            background-color: var(--zhu-red);
+            color: var(--xuan-light);
+        }
+
+        /* ========== 页底山水长卷：填充2 与 填充 服务端拼合为一图（接缝渐变融合），整幅单块呈现 ========== */
+        .ink-scroll {
+            margin-top: 26px;
+            position: relative;
+            border: 1px solid var(--mo-mid);
+            border-radius: 2px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+        }
+        /* 上下两根墨轴杆：整幅如完整手卷 */
+        .ink-scroll::before,
+        .ink-scroll::after {
+            content: "";
+            position: absolute;
+            left: -8px;
+            right: -8px;
+            height: 10px;
+            border-radius: 5px;
+            background: var(--axis-gradient);
+            box-shadow: 0 1px 4px rgba(26, 26, 26, 0.25);
+        }
+        .ink-scroll::before { top: -5px; }
+        .ink-scroll::after { bottom: -5px; }
+        .ink-scroll img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        /* 竖排题跋：flex row-reverse 物理布局保证"第一句最右"，每列独立 vertical-rl 避免换列重叠；
+           字号/间距用 vw+em 随图等比缩放（图高随宽线性变化，固定字号会在窄屏溢出画面） */
+        .ink-scroll-verse {
+            position: absolute;
+            top: 7%;
+            right: 1.8%;
+            display: flex;
+            flex-direction: row-reverse;
+            gap: 0.9em;
+            font-family: 'ZCOOL XiaoWei', 'KaiTi', serif;
+            font-size: clamp(9px, 1.28vw, 16px);
+            color: var(--mo-black);
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.95), 0 0 3px rgba(255, 255, 255, 0.9);
+        }
+        .ink-scroll-verse span {
+            writing-mode: vertical-rl;
+            letter-spacing: 0.45em;
+            line-height: 1;
+        }
+        .ink-scroll-seal {
+            margin-top: 0.9em;
+            background: var(--zhu-red);
+            color: #fff;
+            font-size: 0.7em;
+            letter-spacing: 0.2em;
+            padding: 0.4em 0.2em;
+            border-radius: 1px;
+            box-shadow: 0 1px 3px rgba(26, 26, 26, 0.3);
+        }
+
+        /* ========== 主题切换按钮：右上角圆形墨钮 ========== */
+        .theme-toggle {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 50;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 1px solid var(--mo-mid);
+            background: var(--panel-bg);
+            color: var(--mo-dark);
+            font-family: 'Ma Shan Zheng', 'KaiTi', cursive;
+            font-size: 21px;
+            line-height: 1;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(26, 26, 26, 0.18);
+            backdrop-filter: blur(4px);
+            transition: transform 0.2s, border-color 0.3s, color 0.3s;
+        }
+        .theme-toggle:hover {
+            transform: rotate(12deg) scale(1.08);
+            border-color: var(--zhu-red);
+            color: var(--zhu-red);
+        }
+    </style>
+    <script>
+        // 主题防闪烁：默认水墨风；仅当用户明确切到宣纸主题（缓存值 classic）才保持宣纸。
+        // body 渲染前先按 localStorage 恢复（CSS 走 :root.ink-theme）
+        try {
+            if (localStorage.getItem('web_theme') !== 'classic') document.documentElement.classList.add('ink-theme');
+        } catch (e) { document.documentElement.classList.add('ink-theme'); /* 无法读取缓存时也默认水墨 */ }
+    </script>
+</head>
+<body>
+
+<button type="button" class="theme-toggle" id="themeToggle" title="切换水墨主题">墨</button>
+
+<div class="container">
+    <button type="button" class="nav-handle" id="navHandle" title="收起册架（已导入文件）">册府</button>
+    <h1>翰墨阁</h1>
+    <div class="subtitle">典籍录入 · 文旅</div>
+
+    <div class="layout" id="mainLayout">
+        <!-- 左栏：册架导航（已导入文件 · 撤回），可经左缘"册府"手柄收起 -->
+        <div class="col-nav">
+            <details class="manage-panel" id="managePanel" open>
+                <summary>已导入文件 · 撤回</summary>
+                <div class="manage-inner">
+                    <div class="manage-toolbar">
+                        <label for="mgmtDomainSelect">知识库：</label>
+                        <select id="mgmtDomainSelect">
+                            <option value="tourism">文旅</option>
+                        </select>
+                        <input type="text" class="manage-search" id="mgmtSearch" placeholder="按文件名搜索…" />
+                        <label class="mgmt-select-all" title="全选/取消全选当前列表">
+                            <input type="checkbox" id="mgmtSelectAll" /> 全选
+                        </label>
+                        <button type="button" class="btn-mgmt" id="mgmtBatchBtn" disabled>批量撤回</button>
+                        <button type="button" class="btn-mgmt" id="mgmtRefreshBtn">刷新</button>
+                        <span class="manage-summary" id="mgmtSummary"></span>
+                    </div>
+                    <div class="manage-list" id="mgmtList">
+                        <div class="manage-empty">正在加载该知识库的已导入文件…</div>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <!-- 中栏：业务选择 + 上传导入 -->
+        <div class="col-mid">
+            <div class="domain-selector">
+                <label for="domainSelect">业务：</label>
+                <select id="domainSelect">
+                    <option value="" selected disabled>请选择业务（必选）</option>
+                    <option value="tourism">文旅</option>
+                </select>
+                <span class="content-type-wrap" id="contentTypeWrap" style="display:none;">
+                    <label for="contentTypeSelect">类型：</label>
+                    <select id="contentTypeSelect">
+                        <option value="" selected>自动识别</option>
+                    </select>
+                </span>
+                <span class="domain-hint" id="domainHint">请选择导入业务（必选）</span>
+            </div>
+
+            <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">册</div>
+                <p>轻触或拖拽典籍于此（PDF / MD / DOCX / TXT / JSON / HTML / XLSX / CSV / JPG / PNG 等）</p>
+                <input type="file" id="fileInput" class="file-input" multiple accept=".pdf,.md,.docx,.txt,.json,.html,.htm,.xlsx,.xls,.csv,.jpg,.jpeg,.png,.webp,.bmp">
+            </div>
+        </div>
+
+        <!-- 右栏：导入任务（同款卷轴下拉面板，固定高度内部滚动；"删除记录"仅清本页显示） -->
+        <div class="col-right">
+            <details class="manage-panel task-panel" id="taskPanel" open>
+                <summary>导入任务<span class="task-count" id="taskCount"></span><button type="button" class="btn-clear-tasks" id="clearTasksBtn" title="仅清除本页任务记录显示，不影响数据库与已入库数据">删除记录</button></summary>
+                <div class="manage-inner task-inner">
+                    <div id="fileList" class="file-list task-list-fixed">
+                        <div class="task-empty" id="taskEmptyHint">暂无导入任务，上传文件后此处展示各任务进度</div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 右栏第二面板：外发记录（A2 审计，只读；数据源 GET /egress/records） -->
+            <details class="manage-panel" id="egressPanel">
+                <summary>外发记录<span class="egress-mode-tag" id="egressModeTag" title="IMPORT_EGRESS_MODE 当前档位">mask</span></summary>
+                <div class="manage-inner">
+                    <div class="egress-wrap">
+                        <div class="egress-empty" id="egressEmptyHint">暂无外发记录（导入触发图片识别 / 元数据抽取时按条留痕）</div>
+                        <div class="egress-list" id="egressList"></div>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <!-- 页底山水长卷（png/山水长卷.png：填充2 远山楼阁 + 填充 渔舟湖水 服务端拼合为一图）：
+         题跋《观书有感》+ 翰墨印，上下轴杆，整幅如手卷收尾 -->
+    <div class="ink-scroll">
+        <img src="/ink-scroll.png" alt="山水长卷">
+        <div class="ink-scroll-verse">
+            <span>问渠那得清如许</span>
+            <span>为有源头活水来</span>
+            <span class="ink-scroll-seal">翰墨</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const domainSelect = document.getElementById('domainSelect');
+    const contentTypeWrap = document.getElementById('contentTypeWrap');
+    const contentTypeSelect = document.getElementById('contentTypeSelect');
+    const domainHint = document.getElementById('domainHint');
+
+    const DOMAIN_LABEL = { 'tourism': '文旅' };
+
+    // 文旅内容类型（与后端 content_schema.TourismContentType 枚举对齐，12 类）
+    const TOURISM_CONTENT_TYPES = [
+        '景点信息', '景区介绍', '文化知识介绍', '游记攻略', '推荐运营资料',
+        '游客评论摘要', '常见问答', '运营表格', '线路推荐', '酒店信息', '美食推荐', '交通指南',
+    ];
+
+    // 业务切换：仅文旅显示"内容类型"下拉（可选，默认自动识别）
+    domainSelect.addEventListener('change', () => {
+        const isTourism = domainSelect.value === 'tourism';
+        contentTypeWrap.style.display = isTourism ? 'inline-flex' : 'none';
+        if (!isTourism) contentTypeSelect.value = '';
+        domainHint.textContent = isTourism
+            ? '可选指定内容类型；不选则由系统自动识别'
+            : '请选择导入业务（必选）';
+    });
+    // 填充内容类型选项
+    TOURISM_CONTENT_TYPES.forEach((t) => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        contentTypeSelect.appendChild(opt);
+    });
+    
+    // 默认走导入服务同源地址；如你把页面单独打开（file://），回退到导入服务默认端口。
+    const API_BASE = location.origin.startsWith('http') ? location.origin : 'http://127.0.0.1:8000';
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+    });
+
+    function handleFiles(files) {
+        if (!domainSelect.value) {
+            alert('请先选择导入业务（文旅）');
+            return;
+        }
+        Array.from(files).forEach(uploadFile);
+    }
+
+    function updateProgressBar(bar, percentage) {
+        bar.style.width = percentage + '%';
+        // 颜色走主题变量：进行中朱赤、完成青色（水墨/宣纸两主题各自取值）
+        bar.style.backgroundColor = percentage >= 100
+            ? 'var(--progress-done)'
+            : 'var(--progress-doing)';
+    }
+
+    // 右栏任务计数：按当前任务卡片数（去掉空提示）实时刷新
+    function updateTaskCount() {
+        const el = document.getElementById('taskCount');
+        if (!el) return;
+        const n = fileList.querySelectorAll('.file-item').length;
+        el.textContent = n ? `（${n}）` : '';
+    }
+
+    // 卷轴展开动画重触发：<details> 关闭再打开时浏览器不会重放 CSS 动画，
+    // 这里在 toggle 事件里强制清空 animation 并重排，再放回使其每次展开都重新播放。
+    // 同时清理可能残留的收拢行内样式（历史 bug：收起时 transitionend 被默认 toggle 打断
+    // 未触发，max-height:0 等残留导致下次展开面板卡在一条缝里）。
+    document.querySelectorAll('.manage-panel').forEach(function (panel) {
+        panel.addEventListener('toggle', function () {
+            if (!panel.open) return;
+            const inner = panel.querySelector('.manage-inner');
+            if (!inner) return;
+            inner.style.transition = '';
+            inner.style.maxHeight = '';
+            inner.style.opacity = '';
+            inner.style.overflow = '';
+            inner.style.animation = 'none';
+            void inner.offsetHeight; // 强制重排，清除上一次动画的播放状态
+            inner.style.animation = '';
+        });
+    });
+
+    // 卷轴收起动画：点击 summary 时若面板展开，先接管默认关闭行为（preventDefault），
+    // 把纸面 max-height/opacity 过渡收拢后再真正关闭，避免瞬间消失的突兀感。
+    // 关键：必须阻止 summary 点击的默认 toggle —— 否则浏览器立即关闭面板、内容 display:none，
+    // transitionend 永远不触发，行内 max-height:0 残留会导致下次展开卡在收起状态。
+    document.querySelectorAll('.manage-panel > summary').forEach(function (summary) {
+        summary.addEventListener('click', function (e) {
+            const panel = summary.parentElement;
+            if (!panel.open) return; // 展开：走默认行为，由 toggle 事件重播展开动画
+            e.preventDefault();      // 收起：接管默认行为，先播收拢动画再真正关闭
+            const inner = panel.querySelector('.manage-inner');
+            if (!inner) { panel.open = false; return; }
+            inner.style.overflow = 'hidden';
+            inner.style.maxHeight = inner.scrollHeight + 'px';
+            void inner.offsetHeight; // 先固定当前高度，再过渡收拢到 0
+            inner.style.transition = 'max-height 0.6s ease-in-out, opacity 0.6s ease-in-out';
+            inner.style.maxHeight = '0px';
+            inner.style.opacity = '0.3';
+            let finished = false;
+            const onEnd = function (evt) {
+                if (evt && evt.propertyName !== 'max-height') return;
+                if (finished) return;
+                finished = true;
+                inner.removeEventListener('transitionend', onEnd);
+                inner.style.transition = '';
+                inner.style.maxHeight = '';
+                inner.style.opacity = '';
+                inner.style.overflow = '';
+                panel.open = false;
+            };
+            inner.addEventListener('transitionend', onEnd);
+            // 兜底：若过渡被打断或系统禁用了动画导致 transitionend 不触发，0.8s 后强制完成收起
+            setTimeout(function () { onEnd({ propertyName: 'max-height' }); }, 800);
+        });
+    });
+
+    async function uploadFile(file) {
+        // 创建文件项UI
+        const id = 'file-' + Math.random().toString(36).substr(2, 9);
+        const html = `
+            <div class="file-item" id="${id}">
+                <div class="file-info">
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">${(file.size / 1024).toFixed(2)} KB</span>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar"></div>
+                    </div>
+                    <details class="log-details">
+                        <summary>日志（点击展开）</summary>
+                        <ul class="log-list"></ul>
+                    </details>
+                    <div class="guard-box" style="display:none">
+                        <div class="guard-msg"></div>
+                        <div class="guard-actions"></div>
+                    </div>
+                </div>
+                <div class="status-badge status-uploading">上传中...</div>
+            </div>
+        `;
+        fileList.insertAdjacentHTML('afterbegin', html);
+        // 首个任务出现时移除空提示；确保任务面板展开并刷新计数
+        const emptyHint = document.getElementById('taskEmptyHint');
+        if (emptyHint) emptyHint.remove();
+        const taskPanel = document.getElementById('taskPanel');
+        if (taskPanel && !taskPanel.open) taskPanel.open = true;
+        updateTaskCount();
+        const itemEl = document.getElementById(id);
+        const statusBadge = itemEl.querySelector('.status-badge');
+        const progressBar = itemEl.querySelector('.progress-bar');
+        const progressContainer = itemEl.querySelector('.progress-bar-container');
+        const logDetails = itemEl.querySelector('.log-details');
+        const logSummary = itemEl.querySelector('.log-details summary');
+        const logListEl = itemEl.querySelector('.log-list');
+
+        // 构建FormData
+        const formData = new FormData();
+        formData.append('files', file);
+        formData.append('domain', domainSelect.value);
+        // 文旅可手动指定内容类型（空串=自动识别，后端仅在 tourism 域生效）
+        formData.append('forced_content_type', domainSelect.value === 'tourism' ? contentTypeSelect.value : '');
+
+        try {
+            // 1. 上传文件
+            progressContainer.style.display = 'block';
+            // 模拟上传进度
+            updateProgressBar(progressBar, 50);
+
+            const response = await fetch(`${API_BASE}/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('Upload failed');
+            
+            const result = await response.json();
+            const taskId = result.task_ids[0]; // 假设一次传一个或取第一个
+
+            // 上传完成，进入处理中，进度固定为30%
+            updateProgressBar(progressBar, 30);
+            statusBadge.textContent = '处理中...';
+            statusBadge.className = 'status-badge status-processing';
+
+            // 2. 轮询状态
+            pollStatus(taskId, itemEl);
+
+        } catch (error) {
+            console.error(error);
+            statusBadge.textContent = '失败';
+            statusBadge.className = 'status-badge status-error';
+        }
+    }
+
+    function normalizeDoneLog(text) {
+        // 后端可能返回中文节点名，也可能已拼接“已完成”
+        if (typeof text !== 'string') return String(text);
+        return text.endsWith('已完成') ? text : `${text}已完成`;
+    }
+
+    function normalizeRunningLog(text) {
+        // 后端可能返回中文节点名，也可能已拼接“正在进行.../处理中...”
+        if (typeof text !== 'string') return String(text);
+        if (text.startsWith('正在进行')) return text.endsWith('...') ? text : `${text}...`;
+        return `正在进行${text}...`;
+    }
+
+    function renderLogs(itemEl, doneList, runningList) {
+        const logSummary = itemEl.querySelector('.log-details summary');
+        const logListEl = itemEl.querySelector('.log-list');
+        const logDetails = itemEl.querySelector('.log-details');
+
+        const done = Array.isArray(doneList) ? doneList : [];
+        const running = Array.isArray(runningList) ? runningList : [];
+
+        // 更新 summary（即使收起也能看到进度）
+        logSummary.textContent = `日志（已完成${done.length}，进行中${running.length}，点击展开）`;
+
+        // 清空并重建列表
+        logListEl.innerHTML = '';
+        const lines = [
+            ...done.map(normalizeDoneLog),
+            ...running.map(normalizeRunningLog),
+        ];
+
+        if (lines.length === 0) {
+            const li = document.createElement('li');
+            li.textContent = '暂无日志';
+            logListEl.appendChild(li);
+        } else {
+            for (const line of lines) {
+                const li = document.createElement('li');
+                li.textContent = line;
+                logListEl.appendChild(li);
+            }
+        }
+
+        // 如果没有任何日志，默认收起；否则保持用户选择
+        if (lines.length === 0) {
+            logDetails.open = false;
+        }
+    }
+
+    function renderDomainBadge(itemEl, domain) {
+        if(!domain) return;
+        let badge = itemEl.querySelector('.domain-badge');
+        if(!badge){
+            badge = document.createElement('span');
+            badge.className = 'domain-badge';
+            itemEl.querySelector('.file-name').appendChild(badge);
+        }
+        badge.textContent = DOMAIN_LABEL[domain] || domain;
+        badge.className = 'domain-badge tourism';
+    }
+
+    function showGuardBox(itemEl, message, withActions, onRun, onCancel) {
+        const guardBox = itemEl.querySelector('.guard-box');
+        const guardMsg = itemEl.querySelector('.guard-msg');
+        const guardActions = itemEl.querySelector('.guard-actions');
+        if (!guardBox || !guardMsg || !guardActions) return;
+        guardMsg.textContent = message || '';
+        guardActions.innerHTML = '';
+        if (withActions && onRun && onCancel) {
+            const runBtn = document.createElement('button');
+            runBtn.type = 'button';
+            runBtn.className = 'btn-guard btn-guard-run';
+            runBtn.textContent = '强制导入';
+            const cancelBtn = document.createElement('button');
+            cancelBtn.type = 'button';
+            cancelBtn.className = 'btn-guard btn-guard-cancel';
+            cancelBtn.textContent = '取消';
+            runBtn.addEventListener('click', () => onRun(runBtn, cancelBtn));
+            cancelBtn.addEventListener('click', () => onCancel(runBtn, cancelBtn));
+            guardActions.appendChild(runBtn);
+            guardActions.appendChild(cancelBtn);
+        }
+        guardBox.style.display = 'block';
+    }
+
+    function hideGuardBox(itemEl) {
+        const guardBox = itemEl.querySelector('.guard-box');
+        if (guardBox) guardBox.style.display = 'none';
+    }
+
+    async function confirmImportAction(taskId, action) {
+        const res = await fetch(`${API_BASE}/upload/confirm/${taskId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action }),
+        });
+        return await res.json();
+    }
+
+    /* 任务轮询句柄登记表：taskId -> interval；"删除记录"时统一停止，避免对已移除元素空转请求 */
+    const activePollers = new Map();
+    function stopPoll(taskId, interval) {
+        clearInterval(interval);
+        activePollers.delete(taskId);
+    }
+
+    function pollStatus(taskId, itemEl) {
+        const statusBadge = itemEl.querySelector('.status-badge');
+        const progressBar = itemEl.querySelector('.progress-bar');
+        
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch(`${API_BASE}/status/${taskId}`);
+                const data = await res.json();
+
+                // 渲染日志（done/running）
+                renderLogs(itemEl, data.done_list, data.running_list);
+                // 渲染实际路由领域徽章
+                renderDomainBadge(itemEl, data.domain);
+                
+                if (data.status === 'completed') {
+                    statusBadge.textContent = '已完成';
+                    statusBadge.className = 'status-badge status-completed';
+                    updateProgressBar(progressBar, 100);
+                    stopPoll(taskId, interval);
+                } else if (data.status === 'processing') {
+                    // 保持处理中状态
+                    statusBadge.textContent = '处理中...';
+                    statusBadge.className = 'status-badge status-processing';
+                    updateProgressBar(progressBar, 30);
+                } else if (data.status === 'blocked') {
+                    // 领域预检命中：展示原因，等待用户「强制导入 / 取消」（仅渲染一次）
+                    if (itemEl.dataset.pending !== '1') {
+                        itemEl.dataset.pending = '1';
+                        statusBadge.textContent = '待确认';
+                        statusBadge.className = 'status-badge status-blocked';
+                        showGuardBox(
+                            itemEl,
+                            data.message || '文件与所选业务疑似不匹配，请确认归属',
+                            true,
+                            async (runBtn, cancelBtn) => {
+                                runBtn.disabled = true;
+                                cancelBtn.disabled = true;
+                                runBtn.textContent = '确认中...';
+                                try {
+                                    const r = await confirmImportAction(taskId, 'run');
+                                    if (r.code === 200) {
+                                        itemEl.dataset.pending = '2';
+                                        statusBadge.textContent = '已放行，导入中...';
+                                        statusBadge.className = 'status-badge status-processing';
+                                        updateProgressBar(progressBar, 30);
+                                        hideGuardBox(itemEl);
+                                    } else {
+                                        alert(r.message || '强制导入失败');
+                                        runBtn.disabled = false;
+                                        cancelBtn.disabled = false;
+                                        runBtn.textContent = '强制导入';
+                                    }
+                                } catch (e) {
+                                    console.error(e);
+                                    alert('网络异常，强制导入失败');
+                                    runBtn.disabled = false;
+                                    cancelBtn.disabled = false;
+                                    runBtn.textContent = '强制导入';
+                                }
+                            },
+                            async (runBtn, cancelBtn) => {
+                                runBtn.disabled = true;
+                                cancelBtn.disabled = true;
+                                try {
+                                    const r = await confirmImportAction(taskId, 'cancel');
+                                    if (r.code !== 200) {
+                                        alert(r.message || '取消失败');
+                                        runBtn.disabled = false;
+                                        cancelBtn.disabled = false;
+                                        return;
+                                    }
+                                    statusBadge.textContent = '已取消';
+                                    statusBadge.className = 'status-badge status-error';
+                                    hideGuardBox(itemEl);
+                                    stopPoll(taskId, interval);
+                                } catch (e) {
+                                    console.error(e);
+                                    alert('网络异常，取消失败');
+                                    runBtn.disabled = false;
+                                    cancelBtn.disabled = false;
+                                }
+                            }
+                        );
+                    }
+                } else if (data.status === 'failed') {
+                    statusBadge.textContent = '失败';
+                    statusBadge.className = 'status-badge status-error';
+                    showGuardBox(itemEl, data.message || '导入失败，请展开日志查看', false, null, null);
+                    stopPoll(taskId, interval);
+                }
+            } catch (e) {
+                console.error('Polling error', e);
+            }
+        }, 2000); // 每2秒轮询一次
+        activePollers.set(taskId, interval);   // 登记轮询句柄
+    }
+
+    /* ===== 已导入文件管理（列出 + 搜索 + 撤回） ===== */
+    const managePanel = document.getElementById('managePanel');
+    const mgmtDomainSelect = document.getElementById('mgmtDomainSelect');
+    const mgmtList = document.getElementById('mgmtList');
+    const mgmtSummary = document.getElementById('mgmtSummary');
+    const mgmtSearch = document.getElementById('mgmtSearch');
+    let mgmtLoaded = false;
+    let mgmtFilesCache = [];   // 当前知识库全量文件缓存，搜索框按文件名在前端过滤
+
+    function escHtml(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, c => (
+            { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+        ));
+    }
+
+    async function loadImportedFiles() {
+        const domain = mgmtDomainSelect.value;
+        mgmtList.innerHTML = '<div class="manage-empty">加载中…</div>';
+        mgmtSummary.textContent = '';
+        try {
+            const res = await fetch(`${API_BASE}/files?domain=${encodeURIComponent(domain)}`);
+            const data = await res.json();
+            if (data.code !== 200) {
+                mgmtSummary.textContent = '加载失败';
+                mgmtList.innerHTML = `<div class="manage-empty">${escHtml(data.message || '查询失败')}</div>`;
+                return;
+            }
+            mgmtFilesCache = Array.isArray(data.files) ? data.files : [];
+            // 清理勾选缓存中已不存在的文件（换知识库/文件已被撤回）
+            const validTitles = new Set(mgmtFilesCache.map(f => f.file_title));
+            mgmtSelected = new Set([...mgmtSelected].filter(t => validTitles.has(t)));
+            mgmtSelectAll.checked = false;
+            updateBatchBtn();
+            mgmtSummary.textContent = `共 ${mgmtFilesCache.length} 个文件`;
+            renderMgmtRows(domain, mgmtFilesCache);
+        } catch (e) {
+            console.error('Load imported files error', e);
+            mgmtSummary.textContent = '加载失败';
+            mgmtList.innerHTML = '<div class="manage-empty">网络异常，请点击「刷新」重试</div>';
+        }
+    }
+
+    function renderMgmtRows(domain, files) {
+        // 按搜索框关键字过滤（不区分大小写的文件名包含匹配）
+        const kw = (mgmtSearch.value || '').trim().toLowerCase();
+        const shown = kw
+            ? files.filter(f => String(f.file_title || '').toLowerCase().includes(kw))
+            : files;
+        mgmtSummary.textContent = kw
+            ? `匹配 ${shown.length} / ${files.length} 个文件`
+            : `共 ${files.length} 个文件`;
+        if (!files.length) {
+            mgmtList.innerHTML = '<div class="manage-empty">该知识库暂无已导入文件</div>';
+            return;
+        }
+        if (!shown.length) {
+            mgmtList.innerHTML = `<div class="manage-empty">没有文件名包含「${escHtml(mgmtSearch.value.trim())}」的文件</div>`;
+            return;
+        }
+        mgmtList.innerHTML = shown.map(f => {
+            const title = escHtml(f.file_title);
+            const checked = mgmtSelected.has(f.file_title) ? ' checked' : '';
+            return `<div class="manage-row" title="${title}">
+                <input type="checkbox" class="mgmt-check" data-title="${title}"${checked} />
+                <span class="manage-name">${title}</span>
+                <span class="manage-counts">切块 ${f.chunk_count} · 主体 ${f.entity_count}</span>
+                <button type="button" class="btn-revoke" data-title="${title}">撤回</button>
+            </div>`;
+        }).join('');
+        mgmtList.querySelectorAll('.btn-revoke').forEach(btn => {
+            btn.addEventListener('click', () => revokeFile(domain, btn.dataset.title));
+        });
+        syncSelectAllState();
+    }
+
+    async function revokeRequest(domain, fileTitle) {
+        const res = await fetch(`${API_BASE}/files/revoke`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ domain, file_title: fileTitle })
+        });
+        const data = await res.json();
+        return { ok: data.code === 200, message: data.message || '' };
+    }
+
+    async function revokeFile(domain, fileTitle) {
+        const label = DOMAIN_LABEL[domain] || domain;
+        if (!window.confirm(
+            `确定从【${label}】知识库撤回「${fileTitle}」吗？\n\n该文件的所有切块与主体索引都会被删除，不可恢复。\n如需再次使用请重新上传导入。`
+        )) return;
+        try {
+            const r = await revokeRequest(domain, fileTitle);
+            if (r.ok) {
+                alert('撤回成功：' + r.message);
+                loadImportedFiles();
+            } else {
+                alert('撤回失败：' + (r.message || '未知错误'));
+            }
+        } catch (e) {
+            console.error('Revoke error', e);
+            alert('撤回失败（网络异常），请重试');
+        }
+    }
+
+    /* ===== 批量撤回 ===== */
+    let mgmtSelected = new Set();   // 已勾选的 file_title（跨搜索过滤/重渲染保留）
+    const mgmtSelectAll = document.getElementById('mgmtSelectAll');
+    const mgmtBatchBtn = document.getElementById('mgmtBatchBtn');
+
+    function updateBatchBtn() {
+        const n = mgmtSelected.size;
+        mgmtBatchBtn.disabled = n === 0;
+        mgmtBatchBtn.textContent = n ? `批量撤回(${n})` : '批量撤回';
+    }
+
+    // 全选框状态跟随当前已选数量（全选/部分选/未选）
+    function syncSelectAllState() {
+        const boxes = mgmtList.querySelectorAll('.mgmt-check');
+        const checked = mgmtList.querySelectorAll('.mgmt-check:checked');
+        mgmtSelectAll.checked = boxes.length > 0 && checked.length === boxes.length;
+    }
+
+    // 全选/取消全选：作用于当前过滤显示的行
+    mgmtSelectAll.addEventListener('change', () => {
+        mgmtList.querySelectorAll('.mgmt-check').forEach(cb => {
+            cb.checked = mgmtSelectAll.checked;
+            if (mgmtSelectAll.checked) mgmtSelected.add(cb.dataset.title);
+            else mgmtSelected.delete(cb.dataset.title);
+        });
+        updateBatchBtn();
+    });
+
+    // 单行勾选（事件委托，重渲染后无需重复绑定）
+    mgmtList.addEventListener('change', e => {
+        if (!e.target.classList.contains('mgmt-check')) return;
+        if (e.target.checked) mgmtSelected.add(e.target.dataset.title);
+        else mgmtSelected.delete(e.target.dataset.title);
+        updateBatchBtn();
+    });
+
+    async function batchRevoke() {
+        const domain = mgmtDomainSelect.value;
+        const label = DOMAIN_LABEL[domain] || domain;
+        // 只撤回当前知识库中仍存在的已选文件
+        const titles = [...mgmtSelected].filter(t => mgmtFilesCache.some(f => f.file_title === t));
+        if (!titles.length) { alert('请先勾选要撤回的文件'); return; }
+        const preview = titles.slice(0, 5).map(t => '· ' + t).join('\n');
+        const more = titles.length > 5 ? `\n… 等共 ${titles.length} 个文件` : '';
+        if (!window.confirm(
+            `确定从【${label}】知识库批量撤回以下 ${titles.length} 个文件吗？\n\n${preview}${more}\n\n所有选中文件的切块与主体索引都会被删除，不可恢复。`
+        )) return;
+        mgmtBatchBtn.disabled = true;
+        let ok = 0;
+        const fails = [];
+        for (let i = 0; i < titles.length; i++) {
+            mgmtSummary.textContent = `批量撤回中…（${i + 1}/${titles.length}）`;
+            try {
+                const r = await revokeRequest(domain, titles[i]);
+                if (r.ok) ok++;
+                else fails.push(titles[i] + '：' + (r.message || '未知错误'));
+            } catch (e) {
+                console.error('Batch revoke error', e);
+                fails.push(titles[i] + '：网络异常');
+            }
+        }
+        mgmtSelected.clear();
+        updateBatchBtn();
+        alert(`批量撤回完成：成功 ${ok} 个` +
+            (fails.length ? `，失败 ${fails.length} 个：\n${fails.join('\n')}` : ''));
+        loadImportedFiles();
+    }
+    mgmtBatchBtn.addEventListener('click', batchRevoke);
+
+    // 首次展开面板时自动加载；之后通过「刷新」按钮 / 切换下拉刷新
+    managePanel.addEventListener('toggle', () => {
+        if (managePanel.open && !mgmtLoaded) {
+            mgmtLoaded = true;
+            loadImportedFiles();
+        }
+    });
+    // 左栏改为默认展开的导航栏形态：初始 open 不触发 toggle 事件，这里补一次首次加载
+    if (managePanel.open && !mgmtLoaded) {
+        mgmtLoaded = true;
+        loadImportedFiles();
+    }
+    document.getElementById('mgmtRefreshBtn').addEventListener('click', loadImportedFiles);
+    mgmtDomainSelect.addEventListener('change', loadImportedFiles);
+    // 搜索框输入即过滤（基于已加载缓存，不发请求）
+    mgmtSearch.addEventListener('input', () => renderMgmtRows(mgmtDomainSelect.value, mgmtFilesCache));
+
+    /* ===== 册架导航收放（localStorage 记忆，key=web_nav_collapsed） ===== */
+    const NAV_KEY = 'web_nav_collapsed';
+    const mainLayout = document.getElementById('mainLayout');
+    function applyNav(collapsed) {
+        mainLayout.classList.toggle('nav-hidden', collapsed);
+        const handle = document.getElementById('navHandle');
+        if (handle) handle.title = collapsed ? '展开册架（已导入文件）' : '收起册架（已导入文件）';
+    }
+    (function initNav() {
+        let collapsed = false;
+        try { collapsed = localStorage.getItem(NAV_KEY) === '1'; } catch (e) {}
+        applyNav(collapsed);
+    })();
+    document.getElementById('navHandle').addEventListener('click', () => {
+        const collapsed = !mainLayout.classList.contains('nav-hidden');
+        try { localStorage.setItem(NAV_KEY, collapsed ? '1' : '0'); } catch (e) {}
+        applyNav(collapsed);
+    });
+
+    /* ===== 删除记录：仅清空本页任务列表显示，不调任何接口、不动数据库与已入库数据 ===== */
+    const clearTasksBtn = document.getElementById('clearTasksBtn');
+    clearTasksBtn.addEventListener('click', (e) => {
+        // 阻止冒泡与默认行为：避免触发外层 <summary> 的收拢动画与 details 开合
+        e.preventDefault();
+        e.stopPropagation();
+        const n = fileList.querySelectorAll('.file-item').length;
+        if (!n) { alert('当前没有任务记录'); return; }
+        if (!window.confirm(
+            `确定删除这 ${n} 条任务记录吗？\n\n仅清除本页显示，不删除数据库与已入库内容；` +
+            `进行中的任务将停止在本页跟踪进度（后端任务本身不受影响）。`
+        )) return;
+        activePollers.forEach((interval) => clearInterval(interval));
+        activePollers.clear();
+        fileList.innerHTML = '<div class="task-empty" id="taskEmptyHint">暂无导入任务，上传文件后此处展示各任务进度</div>';
+        updateTaskCount();
+    });
+
+    /* ===== 水墨 / 宣纸双主题切换（localStorage 记忆，key=web_theme） ===== */
+    const THEME_KEY = 'web_theme';
+    function applyTheme(theme) {
+        const ink = theme === 'ink';
+        document.documentElement.classList.toggle('ink-theme', ink);
+        const btn = document.getElementById('themeToggle');
+        if (btn) {
+            btn.textContent = ink ? '纸' : '墨';
+            btn.title = ink ? '切回宣纸主题' : '切换水墨主题';
+        }
+    }
+    (function initTheme() {
+        // head 防闪烁脚本已按缓存恢复 class，这里只负责按钮初始文案（默认水墨，classic=宣纸）
+        let ink = true;
+        try { ink = localStorage.getItem(THEME_KEY) !== 'classic'; } catch (e) {}
+        applyTheme(ink ? 'ink' : 'classic');
+    })();
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        const next = document.documentElement.classList.contains('ink-theme') ? 'classic' : 'ink';
+        try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+        applyTheme(next);
+    });
+
+    /* ===== 外发记录面板（A2 审计）：每 5s 轮询 GET /egress/records（面板展开时） ===== */
+    const egressList = document.getElementById('egressList');
+    const egressEmptyHint = document.getElementById('egressEmptyHint');
+    const egressModeTag = document.getElementById('egressModeTag');
+    const SERVICE_LABEL = { vision: '视觉', llm: 'LLM' };
+    const CT_LABEL = { image: '图片', text: '文本' };
+
+    function fmtBytes(n) {
+        if (!n && n !== 0) return '';
+        if (n < 1024) return n + 'B';
+        if (n < 1024 * 1024) return (n / 1024).toFixed(0) + 'KB';
+        return (n / 1024 / 1024).toFixed(1) + 'MB';
+    }
+    function egressBadge(rec) {
+        if (rec.blocked) return '<span class="e-badge e-blocked">拦截</span>';
+        return rec.result === 'ok'
+            ? '<span class="e-badge e-ok">外发</span>'
+            : '<span class="e-badge e-error">失败</span>';
+    }
+    async function refreshEgressPanel() {
+        try {
+            const res = await fetch(`${API_BASE}/egress/records?limit=30`);
+            const data = await res.json();
+            if (data.mode) {
+                egressModeTag.textContent = data.mode;
+                egressModeTag.classList.toggle('egress-off', !data.egress_enabled);
+            }
+            const records = data.records || [];
+            if (!records.length) {
+                egressList.innerHTML = '';
+                egressEmptyHint.style.display = 'block';
+                return;
+            }
+            egressEmptyHint.style.display = 'none';
+            egressList.innerHTML = records.map((r) => {
+                const svc = SERVICE_LABEL[r.service] || r.service || '-';
+                const ct = CT_LABEL[r.content_type] || r.content_type || '';
+                const doc = r.document || '-';
+                const detail = [
+                    r.target_host ? `host:${r.target_host}` : '',
+                    r.payload_bytes ? `大小:${fmtBytes(r.payload_bytes)}` : '',
+                    r.fingerprint ? `指纹:${r.fingerprint}` : '',
+                    r.mask_hits ? `脱敏:${r.mask_hits}` : '',
+                    r.block_reason || r.error || '',
+                ].filter(Boolean).join('；');
+                return `<div class="egress-row" title="${(r.ts || '')}｜${svc}·${ct}｜${detail}">
+                    <span class="e-ts">${(r.ts || '').slice(11)}</span>
+                    <span class="e-main">[${svc}${ct ? '·' + ct : ''}] ${doc} ${fmtBytes(r.payload_bytes)}</span>
+                    ${egressBadge(r)}</div>`;
+            }).join('');
+        } catch (e) {
+            /* 服务未就绪/接口暂不可用时静默，下一轮再试 */
+        }
+    }
+    setInterval(() => {
+        const panel = document.getElementById('egressPanel');
+        if (panel && panel.open) refreshEgressPanel();
+    }, 5000);
+    document.getElementById('egressPanel').addEventListener('toggle', () => {
+        if (document.getElementById('egressPanel').open) refreshEgressPanel();
+    });
+    refreshEgressPanel();
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,53 @@
+【事项】② M6 遗留缺陷修复（补齐景点跨天重复） + 方案A 智能混合补位（真实景点不足时降档"美食/休闲"）
+【时间】2026-09-09 16:20
+【背景】1.6 C1-fix 落地后，trip-001 曾有 `[2,2,1]`（第 3 天缺景点）→ 用高德真实 POI 补齐后，
+       又暴露出 M6 缺陷：`_topup_attractions` 只与当天去重、未跨天去重，多天都需补齐时
+       会取同一批候选的前 N 个，出现同一景点在多个日期重复。
+       主人同时提出事实性观点：目的地真没景点时不要硬补，可改推荐美食/逛街/休闲。
+       取舍：①选方案A（智能混合补位）②评测口径放宽 ③美食/休闲只在行程文本里自然带出（不动数据模型）。
+
+一、涉及的代码/文件
+  · app/rag/trip_plan/trip_planner_service.py  行程服务核心改动（M6 + 方案A）
+  · test/test_trip_plan_c2.py                   新增 3 个方案A/M6 回归测试
+  · data/eval/run_trip_eval.py                  评测口径：全局 min 判定 → 逐天判定 + 降档日豁免
+  · .env.example                                新增 TRIP_TOPUP_POI_OFFSET=6 配置
+
+二、干了什么
+  [M6 跨天去重]
+    · verify_plan 先收集全程已保留景点名到 used_names（跨天去重集合），
+      后续任一天补齐时 `_topup_attractions(kept, city, need, used)` 都跳过 used 中的名字，
+      杜绝同一景点出现在多个日期。
+
+  [方案A 智能混合补位]（verify_plan 三档逻辑）
+    · 第1档 热门景点补位：当日不足 TRIP_MIN_ATTRS_PER_DAY=2 且整天空 或 只有 1 个时，
+      用高德"景点"候选补齐（TOPUP_POI_OFFSET 由 25 → 6，只取热门前 6，宁缺毋滥，不硬凑冷门）。
+    · 第2档 文本降档（景点资源真的少）：整天空且 `_has_scenic_candidates` 返回 False
+      （拿不到更多不同景点）→ 不再硬补，改 `_append_relax_note` 向该日 description 追加
+      "以美食/休闲/慢节奏为主"说明（_RELAX_NOTE_POOL 三种措辞轮换），让规划器把当天重心放吃与逛。
+    · 第3档 单真实景点保护：已有 1 个真实景点但候选不足补不满 2 → 保留现有真实景点，
+      不硬抠第 2 个冷门（log 警告留痕）。
+    · soft_filled 列表如实记录"该地景点较少，当日以美食/休闲为主"→ 写入【数据保障】。
+
+  [评测口径放宽]（主人取舍"2.放宽"，为小众目的地做防御）
+    · run_trip_eval 由「全局 min_attrs_per_day >= 期望」一刀切 → 抽出纯函数 _judge_structure：
+      逐天判定；某天景点数 < 期望时，若该日 description 已被降档为美食/休闲补位日
+      （_day_is_relaxed 命中 _RELAX_NOTE_POOL 措辞特征）则豁免；否则才算结构缺口。
+    · 保留了硬约束：整天空壳但无补位说明仍 FAIL（不被放宽绕过）；
+      天数不一致、缺坐标、核查率 < 0.9 仍照旧判 FAIL。
+
+三、效果
+  · 真实 API 全量 trip 评测：
+      M6+方案A 后 4/4（output/eval_trip/20260909_m6_planA/，核查率 1.0，均值 45.5s）
+      评测放宽后再复跑 4/4（output/eval_trip/20260909_relax_confirm/，核查率 1.0，均值 44.8s）
+  · trip-001（此前唯一易失败用例）北京 3 日 = [2,2,2]、核查率 1.0；
+    冷门/低质候选不再进行程，每日都是可核查的真实热门景点或合理解释的"美食/休闲"日。
+  · 离线单测：C2 新增 3 个方案A/M6 用例后 11/11 通过（test_m6_topup_prefers_shortage_over_duplicate /
+    test_a_relax_when_scenic_exhausted / test_a_keeps_real_when_one_left_no_scenic_extra）；
+    C1 3/3 回归通过。
+  · 评测判定五种场景离线验证全 PASS：达标日→过 / 降档日豁免→过 /
+    缺景点且非降档→FAIL / 天数不符→FAIL / 空壳无补位说明→FAIL（硬约束不破）。
+
+四、遗留
+  · 评测放宽主要服务于小众目的地（当前 4 条 trip 用例都是大城市、热门补位已能兜底，未真正触发放宽分支）；
+    待日后新增资源少的用例（评测无此类）时验证降档分支端到端表现。
+  · TRIP_TOPUP_POI_OFFSET=6 是启发式值，若某目的地热门景点本身不足 6 且每天都要补，仍可能走降档分支（符合预期）。

@@ -1,0 +1,74 @@
+<Slide style={{ width: 1280, height: 720, background: '#FAF8F3' }}>
+    {/* A 区 · 标题块 */}
+    <Box style={{ height: 110, padding: '24px 64px 0 64px' }}>
+        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: '#2F6E63', letterSpacing: 3 }}>实现 · 核心能力二</Text>
+        <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 34, fontWeight: 'bold', color: '#26302C', marginTop: 8 }}>一句话，行程参考自动生成</Text>
+    </Box>
+    {/* B 区 · 上画卷大图 / 中四步 / 下洞察条 */}
+    <Box style={{ flex: 1, padding: '12px 64px 74px 64px' }}>
+        <Box style={{ position: 'relative', height: 258, borderRadius: 14, overflow: 'hidden' }}>
+            <Image src="assets/plan_route_ink.png" style={{ width: 1152, height: 258, objectFit: 'cover' }} />
+            <Box style={{ position: 'absolute', top: 18, right: 18, background: 'rgba(20,32,28,0.55)', borderRadius: 8, padding: '8px 16px' }}>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 15, color: '#FAF8F3' }}>"帮我规划一次从武汉出发的三日游"</Text>
+            </Box>
+            <Box style={{ position: 'absolute', bottom: 16, left: 18, background: 'rgba(181,84,45,0.92)', borderRadius: 16, padding: '6px 16px' }}>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, fontWeight: 'bold', color: '#FAF8F3', letterSpacing: 1 }}>规划模式 · 已点亮</Text>
+            </Box>
+        </Box>
+        <Box style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 20 }}>
+            <Box style={{ flex: 1 }}>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <Box style={{ width: 36, height: 36, borderRadius: 18, background: '#2F6E63', justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#FAF8F3' }}>1</Text>
+                    </Box>
+                    <FAIcon name='map-marker-alt' style={{ fill: '#2F6E63', width: 22, height: 22 }} />
+                </Box>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 19, fontWeight: 'bold', color: '#26302C', marginTop: 10 }}>听懂目的地</Text>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: '#26302C', opacity: 0.72, lineHeight: 1.5, marginTop: 5 }}>从哪出发、想去哪、玩几天，一次问清</Text>
+            </Box>
+            <FAIcon name='arrow-right' style={{ fill: 'rgba(38,48,44,0.3)', width: 20, height: 20, marginTop: 8 }} />
+            <Box style={{ flex: 1 }}>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <Box style={{ width: 36, height: 36, borderRadius: 18, background: '#B5542D', justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#FAF8F3' }}>2</Text>
+                    </Box>
+                    <FAIcon name='cloud-sun' style={{ fill: '#B5542D', width: 22, height: 22 }} />
+                </Box>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 19, fontWeight: 'bold', color: '#26302C', marginTop: 10 }}>查天气</Text>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: '#26302C', opacity: 0.72, lineHeight: 1.5, marginTop: 5 }}>对接和风天气：未来几天晴雨与气温</Text>
+            </Box>
+            <FAIcon name='arrow-right' style={{ fill: 'rgba(38,48,44,0.3)', width: 20, height: 20, marginTop: 8 }} />
+            <Box style={{ flex: 1 }}>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <Box style={{ width: 36, height: 36, borderRadius: 18, background: '#B5542D', justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#FAF8F3' }}>3</Text>
+                    </Box>
+                    <FAIcon name='car' style={{ fill: '#B5542D', width: 22, height: 22 }} />
+                </Box>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 19, fontWeight: 'bold', color: '#26302C', marginTop: 10 }}>查路线</Text>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: '#26302C', opacity: 0.72, lineHeight: 1.5, marginTop: 5 }}>对接高德地图：驾车距离、耗时与路线</Text>
+            </Box>
+            <FAIcon name='arrow-right' style={{ fill: 'rgba(38,48,44,0.3)', width: 20, height: 20, marginTop: 8 }} />
+            <Box style={{ flex: 1 }}>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <Box style={{ width: 36, height: 36, borderRadius: 18, background: '#B5542D', justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#FAF8F3' }}>4</Text>
+                    </Box>
+                    <FAIcon name='clock' style={{ fill: '#B5542D', width: 22, height: 22 }} />
+                </Box>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 19, fontWeight: 'bold', color: '#26302C', marginTop: 10 }}>对准当地时间</Text>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: '#26302C', opacity: 0.72, lineHeight: 1.5, marginTop: 5 }}>自动校准当地当前日期，行程不写错日子</Text>
+            </Box>
+        </Box>
+        <Box style={{ background: 'rgba(47,110,99,0.07)', borderRadius: 12, padding: '14px 24px', marginTop: 18 }}>
+            <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 16, color: '#26302C', lineHeight: 1.6 }}>
+                <span style={{ fontWeight: 'bold', color: '#B5542D' }}>后三路并行，不用排队：</span>查天气、查路线、看时间同时办理，几秒内与资料里的游玩建议汇成<span style={{ fontWeight: 'bold' }}>一条行程参考</span>。
+            </Text>
+        </Box>
+    </Box>
+    {/* C 区 · 页脚 */}
+    <Box style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: '0 64px' }}>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>文旅智能问答助手</Text>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>06 / 10</Text>
+    </Box>
+</Slide>

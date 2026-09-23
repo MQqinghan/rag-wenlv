@@ -1,0 +1,56 @@
+<Slide style={{ width: 1280, height: 720, background: '#FAF8F3' }}>
+    {/* A 区 · 标题块 */}
+    <Box style={{ height: 110, padding: '24px 64px 0 64px' }}>
+        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: '#2F6E63', letterSpacing: 3 }}>需求背景</Text>
+        <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 34, fontWeight: 'bold', color: '#26302C', marginTop: 8 }}>三个真实的痛点</Text>
+    </Box>
+    {/* B 区 · 内容：左痛点 60% / 右目标卡 40% */}
+    <Box style={{ flex: 1, padding: '18px 64px 74px 64px', flexDirection: 'row', gap: 28 }}>
+        <Box style={{ flex: 3, flexDirection: 'column', justifyContent: 'space-between', paddingRight: 4 }}>
+            <Box style={{ flexDirection: 'row', gap: 20, alignItems: 'flex-start' }}>
+                <Box style={{ width: 56, height: 56, borderRadius: 12, background: 'rgba(47,110,99,0.08)', justifyContent: 'center', alignItems: 'center' }}>
+                    <FAIcon name='folder-open' style={{ fill: '#2F6E63', width: 28, height: 28 }} />
+                </Box>
+                <Box style={{ flex: 1 }}>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 22, fontWeight: 'bold', color: '#26302C' }}>资料散落各处</Text>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 16, color: '#26302C', opacity: 0.72, lineHeight: 1.55, marginTop: 8 }}>音视频、文档、图片各存一方，想找一个知识点，要翻好几个地方。</Text>
+                </Box>
+            </Box>
+            <Box style={{ flexDirection: 'row', gap: 20, alignItems: 'flex-start' }}>
+                <Box style={{ width: 56, height: 56, borderRadius: 12, background: 'rgba(47,110,99,0.08)', justifyContent: 'center', alignItems: 'center' }}>
+                    <FAIcon name='search' style={{ fill: '#2F6E63', width: 28, height: 28 }} />
+                </Box>
+                <Box style={{ flex: 1 }}>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 22, fontWeight: 'bold', color: '#26302C' }}>查询像「翻柜子」</Text>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 16, color: '#26302C', opacity: 0.72, lineHeight: 1.55, marginTop: 8 }}>关键词搜不准，换个说法就搜不到，更没法接着追问。</Text>
+                </Box>
+            </Box>
+            <Box style={{ flexDirection: 'row', gap: 20, alignItems: 'flex-start' }}>
+                <Box style={{ width: 56, height: 56, borderRadius: 12, background: 'rgba(47,110,99,0.08)', justifyContent: 'center', alignItems: 'center' }}>
+                    <FAIcon name='route' style={{ fill: '#2F6E63', width: 28, height: 28 }} />
+                </Box>
+                <Box style={{ flex: 1 }}>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 22, fontWeight: 'bold', color: '#26302C' }}>出行规划费时费力</Text>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 16, color: '#26302C', opacity: 0.72, lineHeight: 1.55, marginTop: 8 }}>天气、路线、攻略分散在不同应用里，只能自己一条条拼。</Text>
+                </Box>
+            </Box>
+        </Box>
+        <Box style={{ flex: 2, borderRadius: 14, padding: '30px 30px 26px 30px', background: 'linear-gradient(135deg, rgba(47,110,99,0.95) 0%, rgba(47,110,99,0.72) 100%)' }}>
+            <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.75)', letterSpacing: 3 }}>我们想要的</Text>
+            <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 24, fontWeight: 'bold', color: '#FAF8F3', marginTop: 14, lineHeight: 1.4 }}>像和一位博学的助手聊天</Text>
+            <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 16, color: 'rgba(255,255,255,0.92)', lineHeight: 1.65, marginTop: 14 }}>
+                问书、问景、问行程，它都答得上；每个回答都注明出处，查不到的就直说查不到。
+            </Text>
+            <Box style={{ marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.3)', paddingTop: 16 }}>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 15, color: 'rgba(255,255,255,0.9)', lineHeight: 1.6 }}>
+                    <span style={{ fontWeight: 'bold', color: '#FAF8F3' }}>立项判断：</span>痛点不在「没有资料」，而在「不会回答」——所以项目主打听得懂问题、答得有依据。
+                </Text>
+            </Box>
+        </Box>
+    </Box>
+    {/* C 区 · 页脚 */}
+    <Box style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: '0 64px' }}>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>文旅智能问答助手</Text>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>02 / 10</Text>
+    </Box>
+</Slide>

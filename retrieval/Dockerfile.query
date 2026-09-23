@@ -1,0 +1,30 @@
+# ==========================================================
+# 查询服务镜像 —— A5 部署切片（T8）
+# 安装组：仅共享底座（不含 import extra，导入侧表格/MinerU 包不进镜像）
+# 对应：app/api/http/query_server.py，端口 8001
+#
+# 构建（项目根目录）：
+#   docker build -f Dockerfile.query -t rag-query:latest .
+# 运行（模型目录需挂载，见 docker-compose.yml）：
+#   docker run --env-file .env -p 8001:8001 -v ./models:/app/models rag-query:latest
+# ==========================================================
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    APP_ROLE=query
+
+WORKDIR /app
+
+# 1) 依赖先行（共享底座：bge/milvus/fastapi 等，不含导入侧专属包）
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen
+
+# 2) 代码后拷贝
+COPY . .
+
+EXPOSE 8001
+
+CMD ["uv", "run", "--frozen", "python", "app/api/http/query_server.py"]

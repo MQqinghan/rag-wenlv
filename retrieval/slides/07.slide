@@ -1,0 +1,51 @@
+<Slide style={{ width: 1280, height: 720, background: '#FAF8F3' }}>
+    {/* A 区 · 标题块 */}
+    <Box style={{ height: 110, padding: '24px 64px 0 64px' }}>
+        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: '#2F6E63', letterSpacing: 3 }}>实现 · 后台流水线</Text>
+        <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 34, fontWeight: 'bold', color: '#26302C', marginTop: 8 }}>六站流水线：资料如何「上架」</Text>
+    </Box>
+    {/* B 区 · 左主色栏 / 右六站时间线 */}
+    <Box style={{ flex: 1, padding: '18px 64px 74px 64px', flexDirection: 'row', gap: 28 }}>
+        <Box style={{ width: 340, borderRadius: 14, padding: '30px 28px 26px 28px', background: 'linear-gradient(160deg, rgba(47,110,99,0.96) 0%, rgba(47,110,99,0.70) 100%)' }}>
+            <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.75)', letterSpacing: 3 }}>分 · 资料从哪来</Text>
+            <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 30, fontWeight: 'bold', color: '#FAF8F3', lineHeight: 1.45, marginTop: 16 }}>六站自动接力<br />无需人工搬运</Text>
+            <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 16, color: 'rgba(255,255,255,0.92)', lineHeight: 1.7, marginTop: 18 }}>
+                从一份原始文件，到「随问随查」的资料，中间六站全部自动完成。
+            </Text>
+            <Box style={{ marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.3)', paddingTop: 16 }}>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 15, color: 'rgba(255,255,255,0.88)', lineHeight: 1.6 }}>
+                    上架一次、全馆受益——同一份资料可被反复精准检索，这是「问得准」的物质基础。
+                </Text>
+            </Box>
+        </Box>
+        <Box style={{ flex: 1, position: 'relative' }}>
+            <Box style={{ position: 'absolute', left: 16, top: 24, bottom: 24, width: 2, background: 'rgba(38,48,44,0.12)' }} />
+            <Box style={{ flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+                {[
+                    { n: '1', icon: 'inbox', t: '收件员', d: '接收上传的文档、音频、图片，来者不拒' },
+                    { n: '2', icon: 'exchange', t: '翻译官', d: 'PDF、Word、Markdown 等统一转成标准格式' },
+                    { n: '3', icon: 'microphone', t: '速记员', d: '音频转成文字稿，图片读出画面与文字' },
+                    { n: '4', icon: 'layer-group', t: '整理装订', d: '长资料切成小段，查询时才能精准命中' },
+                    { n: '5', icon: 'tags', t: '贴标签', d: '标出「讲什么、在哪、属于谁」，提取书名与景点等关键信息' },
+                    { n: '6', icon: 'warehouse', t: '上架入库', d: '存入知识库，立等可查' },
+                ].map((s, i) => (
+                    <Box key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                        <Box style={{ width: 34, height: 34, borderRadius: 17, background: i === 5 ? '#B5542D' : '#2F6E63', justifyContent: 'center', alignItems: 'center', zIndex: 1 }}>
+                            <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#FAF8F3' }}>{s.n}</Text>
+                        </Box>
+                        <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                            <FAIcon name={s.icon} style={{ fill: i === 5 ? '#B5542D' : '#2F6E63', width: 20, height: 20 }} />
+                            <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 18, fontWeight: 'bold', color: '#26302C', width: 96 }}>{s.t}</Text>
+                            <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14.5, color: '#26302C', opacity: 0.72, flex: 1 }}>{s.d}</Text>
+                        </Box>
+                    </Box>
+                ))}
+            </Box>
+        </Box>
+    </Box>
+    {/* C 区 · 页脚 */}
+    <Box style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: '0 64px' }}>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>文旅智能问答助手</Text>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>07 / 10</Text>
+    </Box>
+</Slide>

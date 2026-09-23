@@ -1,0 +1,1175 @@
+<!-- 统一查询演示页面：文旅/闲聊自动路由，普通问答 + SSE 流式。 -->
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="sgV9JjfMXf8Kn84AWW1k0v">
+<head data-page-node-id="1pTU0cPmf1zSWy0CrpJvka">
+  <meta charset="UTF-8" data-page-node-id="HFHmnANqMp3DrLQkU6Y2O9" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" data-page-node-id="iyqbqgsDf1jGGu1mPAxVah" />
+  <title>青简阁 · 文问</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.ico" data-page-node-id="10rN2ERmGhPXIfKMJn9wQ5">
+  <!-- 古风字体：ZCOOL XiaoWei 清雅宋做标题，Noto Serif SC 衬线宋做正文 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" data-page-node-id="FV3HuJ8BOY958F4YoHCAnU">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin data-page-node-id="Q3UYfs8LEknCNkz7S0P1Ax">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" data-page-node-id="6XiBINqu3i6F0v3KnPFyAq">
+  <!-- markdown 渲染 + XSS 清洗，用于把答案里的 **加粗** / 列表 / 标题渲染美观 -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+  <style>
+    /* ========== 古风变量：青瓷绿 + 月白（经典主题；水墨主题见 :root.ink-theme） ========== */
+    :root{
+      --yue-bai: #f0f4f8;          /* 月白底 */
+      --yue-light: #f8fafc;        /* 浅月白 */
+      --qing-main: #6b9080;        /* 青瓷绿主色 */
+      --qing-dark: #52766a;        /* 青瓷绿暗 */
+      --qing-light: #a4c3b2;       /* 青瓷绿浅 */
+      --qing-ghost: rgba(107,144,128,.12); /* 青瓷绿淡晕 */
+      --mo-black: #2c3e50;         /* 浓墨（answer-text 标题引用） */
+      --mo-dark: #2c3e50;          /* 淡墨 */
+      --mo-mid: #4a5c6a;           /* 中墨 */
+      --mo-light: #7a8a99;         /* 浅墨 */
+      --zhu-red: #b22222;          /* 朱砂(点缀) */
+      --an-gold: #b8860b;          /* 暗金(分割线) */
+      --border: rgba(107,144,128,.32); /* 青瓷绿细线 */
+      --shadow: 0 6px 24px rgba(107,144,128,.16);
+
+      /* ---- 背景 / 半透明面板（两主题各自取值） ---- */
+      --bg-url: url('/preview.jpg');
+      --body-ov1: rgba(240,244,248,0.62);
+      --body-ov2: rgba(248,250,252,0.68);
+      --app-bg: rgba(248, 250, 252, 0.92);   /* 主卡片纸面 */
+      --white-pill: rgba(255,255,255,.7);    /* 药丸/提示条 */
+      --white-card: rgba(255,255,255,.92);   /* 气泡/输入框 */
+      --avatar-bg: rgba(255,255,255,.85);
+      --suggest-bg: rgba(255,255,255,.5);
+      --suggest-btn-bg: rgba(255,255,255,.78);
+      --composer-bg: rgba(255,255,255,.85);
+      --toast-bg: rgba(44,62,80,.92);
+
+      /* ---- 主色控件（logo / 按钮 / 用户气泡） ---- */
+      --logo-bg: var(--qing-main);
+      --logo-color: var(--yue-light);
+      --btn-bg: var(--qing-main);
+      --btn-border: var(--qing-dark);
+      --btn-color: var(--yue-light);
+      --user-bubble-bg: var(--qing-main);
+      --user-bubble-color: var(--yue-light);
+      --user-bubble-border: var(--qing-dark);
+    }
+
+    /* ========== 水墨主题：主色白、墨辅助、赤点缀、少量青 ========== */
+    :root.ink-theme{
+      --yue-bai: #f6f6f4;
+      --yue-light: #ffffff;
+      --qing-main: #4a6b7c;        /* 青灰（少量青） */
+      --qing-dark: #3a5562;
+      --qing-light: #9fb3bc;
+      --qing-ghost: rgba(74,107,124,.10);
+      --mo-black: #1f1f22;
+      --mo-dark: #2b2b2e;
+      --mo-mid: #54545a;
+      --mo-light: #8a8a90;
+      --zhu-red: #9e2b25;
+      --an-gold: #8a7a5a;
+      --border: rgba(43,43,46,.18);
+      --shadow: 0 6px 24px rgba(31,31,34,.12);
+
+      --bg-url: url('/ink-chat.jpg');
+      --body-ov1: rgba(255,255,255,0.55);
+      --body-ov2: rgba(252,252,250,0.66);
+      --app-bg: rgba(255,255,255,0.90);
+      --white-pill: rgba(255,255,255,.75);
+      --white-card: rgba(255,255,255,.94);
+      --avatar-bg: rgba(255,255,255,.9);
+      --suggest-bg: rgba(255,255,255,.55);
+      --suggest-btn-bg: rgba(255,255,255,.85);
+      --composer-bg: rgba(255,255,255,.88);
+      --toast-bg: rgba(43,43,46,.92);
+
+      --logo-bg: #2f2f33;          /* 墨印 logo */
+      --logo-color: #f6f6f4;
+      --btn-bg: #4a4a50;           /* 墨钮 */
+      --btn-border: #2f2f33;
+      --btn-color: #f6f6f4;
+      --user-bubble-bg: #3f4b52;   /* 墨青气泡 */
+      --user-bubble-color: #f6f6f4;
+      --user-bubble-border: #2e3a41;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: 'Noto Serif SC', '宋体', serif;
+      /* 底图做背景,半透明蒙层偏亮偏冷（水墨主题换红日红梅图 + 白蒙层） */
+      background-image:
+        linear-gradient(var(--body-ov1), var(--body-ov2)),
+        var(--bg-url);
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      color:var(--mo-dark);
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:18px;
+    }
+
+    /* 简约卡片:单层细线+小圆角,无卷轴立柱 */
+    .app{
+      width:100%;
+      max-width:980px;
+      height:min(820px, 92vh);
+      background:var(--app-bg);
+      backdrop-filter: blur(5px);
+      border:1px solid var(--border);
+      border-radius:6px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* 顶栏:左侧青瓷绿印章 logo + 标题,右侧操作 */
+    .topbar{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px 20px;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(90deg, var(--qing-ghost), transparent 70%);
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:240px}
+    .logo{
+      width:38px;height:38px;border-radius:4px;
+      background:var(--logo-bg);
+      color:var(--logo-color);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'ZCOOL XiaoWei', 'KaiTi', serif;
+      font-size:22px;
+      font-weight:700;
+      box-shadow:0 2px 8px rgba(107,144,128,.32);
+      letter-spacing:0;
+    }
+    .title{display:flex;flex-direction:column;line-height:1.2}
+    .title strong{
+      font-family:'ZCOOL XiaoWei', 'KaiTi', serif;
+      font-size:17px;
+      color:var(--mo-dark);
+      letter-spacing:3px;
+    }
+    .title span{
+      font-family:'Noto Serif SC', serif;
+      font-size:12px;
+      color:var(--mo-light);
+      margin-top:3px;
+      letter-spacing:1px;
+    }
+    .top-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
+    .pill{
+      font-family:'ZCOOL XiaoWei', 'KaiTi', serif;
+      font-size:12px;color:var(--mo-mid);
+      border:1px solid var(--border);
+      padding:6px 12px;border-radius:2px;
+      background:var(--white-pill);
+      letter-spacing:2px;
+    }
+    .pill.domain{display:flex;align-items:center;gap:6px}
+    .dot-live{width:7px;height:7px;border-radius:50%;background:var(--qing-main);display:inline-block}
+    .btn{
+      border:1px solid var(--btn-border);
+      background:var(--btn-bg);
+      color:var(--btn-color);
+      padding:7px 14px;border-radius:2px;font-size:12px;cursor:pointer;
+      font-family:'ZCOOL XiaoWei', 'KaiTi', serif;
+      letter-spacing:3px;
+      transition: background-color .2s;
+    }
+    .btn:hover{background:var(--btn-border)}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+
+    /* 聊天区:留白简约,气泡细线 */
+    .chat{
+      flex:1;overflow:auto;padding:18px 16px 10px;
+      background:
+        linear-gradient(180deg, var(--qing-ghost), transparent 35%),
+        linear-gradient(0deg, rgba(164,195,178,.06), transparent 45%);
+    }
+    .dayline{
+      text-align:center;color:var(--mo-light);font-size:12px;
+      font-family:'ZCOOL XiaoWei','KaiTi',serif;
+      letter-spacing:3px;
+      margin:6px 0 16px;
+    }
+    .dayline::before,.dayline::after{
+      content:"——";color:var(--qing-light);margin:0 10px;
+    }
+    .msg{display:flex;gap:10px;margin:12px 0;align-items:flex-end}
+    .msg.user{justify-content:flex-end}
+    .msg > div:not(.avatar){flex:1;min-width:0}
+    .msg.user > div:not(.avatar){display:flex;flex-direction:column;align-items:flex-end}
+    .avatar{
+      width:36px;height:36px;border-radius:4px;
+      background:var(--avatar-bg);
+      border:1px solid var(--border);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'ZCOOL XiaoWei','KaiTi',serif;
+      font-size:16px;color:var(--qing-dark);flex:0 0 auto;
+      letter-spacing:0;
+    }
+    .avatar.bot{
+      background:var(--qing-ghost);
+      color:var(--qing-dark);
+      border-color:var(--qing-light);
+    }
+    .bubble{
+      max-width:min(720px, 76%);
+      display:inline-block;border-radius:4px;padding:11px 14px;
+      border:1px solid var(--border);
+      background:var(--white-card);
+      position:relative;line-height:1.65;font-size:14px;
+      white-space:pre-wrap;overflow-wrap:break-word;
+      font-family:'Noto Serif SC', serif;
+      color:var(--mo-dark);
+    }
+    .msg.user .bubble{
+      background:var(--user-bubble-bg);color:var(--user-bubble-color);
+      border-color:var(--user-bubble-border);
+    }
+    .meta{
+      font-family:'ZCOOL XiaoWei',serif;
+      font-size:11px;color:var(--mo-light);margin-top:6px;
+      letter-spacing:1px;
+    }
+    .msg.user .meta{color:rgba(255,255,255,.85)}
+    .tag{
+      display:inline-block;font-size:10px;line-height:1;
+      padding:3px 8px;border-radius:1px;
+      margin-left:8px;vertical-align:1px;
+      font-family:'ZCOOL XiaoWei','KaiTi',serif;
+      letter-spacing:2px;
+      border:1px solid;
+    }
+    .tag.tourism{background:var(--qing-ghost);color:var(--qing-dark);border-color:var(--qing-light)}
+    .tag.chitchat{background:rgba(184,134,11,.10);color:var(--an-gold);border-color:rgba(184,134,11,.4)}
+
+    /* 进度区:细线虚框 */
+    details.progress{
+      margin-top:10px;
+      border:1px dashed var(--qing-light);
+      border-radius:3px;
+      padding:8px 10px;
+      background:var(--qing-ghost);
+    }
+    details.progress summary{
+      cursor:pointer;user-select:none;
+      color:var(--mo-mid);font-size:12px;
+      font-family:'ZCOOL XiaoWei',serif;letter-spacing:1px;
+    }
+    .progress ul{margin:8px 0 0 18px;padding:0}
+    .progress li{margin:4px 0;font-size:12px;color:var(--mo-mid);font-family:'Noto Serif SC',serif}
+
+    .answer-images{margin-top:10px;display:flex;flex-direction:column;gap:10px}
+    .answer-images img{
+      display:block;max-width:min(100%, 600px);max-height:600px;
+      width:auto;height:auto;
+      border-radius:4px;border:1px solid var(--border);
+      box-shadow:0 4px 14px rgba(107,144,128,.14);
+      background:#fff;
+    }
+    .answer-images a{font-size:12px;color:var(--mo-light);text-decoration:none;word-break:break-all}
+    /* 行程地图（问题5）：行程类回答在正文下方内嵌高德地图（按天标注 + 连线） */
+    .answer-map{
+      margin-top:12px;width:100%;height:320px;border-radius:10px;overflow:hidden;
+      border:1px solid var(--border);background:var(--qing-ghost);
+    }
+    .answer-map-tip{margin-top:6px;font-size:12px;color:var(--mo-light);line-height:1.5}
+
+    /* 打字动画:青瓷绿小点 */
+    .typing{display:inline-flex;gap:6px;align-items:center}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--qing-light);animation:bounce 1.2s infinite ease-in-out}
+    .dot:nth-child(2){animation-delay:.15s}
+    .dot:nth-child(3){animation-delay:.3s}
+    @keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.6}40%{transform:translateY(-5px);opacity:1}}
+
+    /* 建议问题:仿竹简横条 */
+    .suggest{
+      display:flex;flex-wrap:wrap;gap:8px;padding:10px 16px;
+      background:var(--suggest-bg);
+      border-top:1px dashed var(--qing-light);
+    }
+    .suggest button{
+      border:1px solid var(--border);
+      background:var(--suggest-btn-bg);
+      color:var(--mo-mid);
+      font-family:'ZCOOL XiaoWei','KaiTi',serif;
+      font-size:13px;padding:6px 12px;border-radius:2px;cursor:pointer;
+      letter-spacing:2px;
+      transition: all .2s;
+    }
+    .suggest button:hover{
+      border-color:var(--qing-main);
+      color:var(--qing-dark);
+      background:var(--qing-ghost);
+    }
+
+    /* 输入区:细线圆角 */
+    .composer{
+      border-top:1px solid var(--border);
+      padding:12px 16px;display:flex;gap:10px;align-items:flex-end;
+      background:var(--composer-bg);
+    }
+    textarea{
+      flex:1;resize:none;min-height:46px;max-height:140px;
+      padding:10px 14px;border-radius:4px;
+      border:1px solid var(--border);outline:none;
+      font-family:'Noto Serif SC',serif;
+      font-size:14px;line-height:1.6;color:var(--mo-dark);
+      background:var(--white-card);
+    }
+    textarea:focus{
+      border-color:var(--qing-main);
+      box-shadow:0 0 0 3px var(--qing-ghost);
+    }
+    .send{
+      width:92px;height:46px;border:1px solid var(--btn-border);
+      border-radius:4px;cursor:pointer;
+      font-family:'ZCOOL XiaoWei','KaiTi',serif;
+      font-size:15px;color:var(--btn-color);
+      background:var(--btn-bg);
+      letter-spacing:6px;
+      transition: background-color .2s;
+    }
+    .send:hover{background:var(--btn-border)}
+    .send:disabled{opacity:.55;cursor:not-allowed}
+    .hint{
+      padding:8px 16px 12px;color:var(--mo-light);font-size:12px;
+      background:var(--white-pill);
+      font-family:'ZCOOL XiaoWei',serif;letter-spacing:1px;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      border:1px solid var(--border);padding:1px 6px;border-radius:3px;
+      background:var(--qing-ghost);color:var(--qing-dark);
+    }
+
+    /* 轻提示 toast */
+    #toast{
+      position:fixed;left:50%;top:24px;transform:translateX(-50%) translateY(-12px);
+      background:var(--toast-bg);color:var(--yue-light);
+      font-family:'ZCOOL XiaoWei','KaiTi',serif;font-size:13px;letter-spacing:2px;
+      padding:10px 18px;border-radius:4px;box-shadow:var(--shadow);
+      opacity:0;pointer-events:none;transition:all .25s;z-index:999;
+    }
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    /* ========== 答案 markdown 渲染样式 ========== */
+    .answer-text{font-size:14px;line-height:1.7;color:var(--mo-dark)}
+    .answer-text h1,.answer-text h2,.answer-text h3,.answer-text h4{
+      font-family:'ZCOOL XiaoWei','KaiTi',serif;
+      color:var(--mo-black);margin:14px 0 8px;line-height:1.4;letter-spacing:1px;
+    }
+    .answer-text h1{font-size:19px}
+    .answer-text h2{font-size:17px;border-bottom:1px solid var(--border);padding-bottom:4px}
+    .answer-text h3{font-size:15px}
+    .answer-text h4{font-size:14px}
+    .answer-text p{margin:8px 0}
+    .answer-text strong{color:var(--mo-black);font-weight:700}
+    .answer-text em{color:var(--qing-dark);font-style:normal}
+    .answer-text ul,.answer-text ol{margin:8px 0;padding-left:22px}
+    .answer-text li{margin:4px 0;line-height:1.7}
+    .answer-text ul li::marker{color:var(--qing-main)}
+    .answer-text ol li::marker{color:var(--qing-main);font-family:'ZCOOL XiaoWei',serif}
+    .answer-text code{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+      background:var(--qing-ghost);padding:1px 6px;border-radius:3px;
+      font-size:13px;color:var(--zhu-red);
+    }
+    .answer-text pre{
+      background:rgba(44,62,80,.05);border:1px solid var(--border);
+      border-radius:4px;padding:10px 12px;overflow-x:auto;margin:10px 0;
+    }
+    .answer-text pre code{background:none;padding:0;color:var(--mo-dark);font-size:13px}
+    .answer-text blockquote{
+      border-left:3px solid var(--qing-light);padding:4px 12px;
+      margin:10px 0;color:var(--mo-mid);background:var(--qing-ghost);
+    }
+    .answer-text a{color:var(--qing-dark);text-decoration:underline;text-underline-offset:2px}
+    .answer-text hr{border:none;border-top:1px dashed var(--qing-light);margin:14px 0}
+    .answer-text table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13px}
+    .answer-text th,.answer-text td{border:1px solid var(--border);padding:6px 10px;text-align:left}
+    .answer-text th{background:var(--qing-ghost);color:var(--mo-black);font-weight:700}
+  </style>
+  <script>
+    // 主题防闪烁：body 渲染前先按 localStorage 恢复水墨主题（CSS 走 :root.ink-theme）
+    try {
+      if (localStorage.getItem('web_theme') === 'ink') document.documentElement.classList.add('ink-theme');
+    } catch (e) { /* 隐私模式等场景静默降级 */ }
+  </script>
+</head>
+<body data-page-node-id="uvoDAKeK5dDfcviIloWxFu">
+  <div class="app" data-page-node-id="ecliUqZncGArG64skHvy9d">
+    <div class="topbar" data-page-node-id="NG7RxOa8tV2DHqrwgYnHMy">
+      <div class="brand" data-page-node-id="MBPuRZ4q4elsrWZVQKBkBj">
+        <div class="logo" data-page-node-id="z8CvvM2p6TtXVOdWUDwTtk">简</div>
+        <div class="title" data-page-node-id="VnVDgi4SfzDv7DJLMSu4ka">
+          <strong data-page-node-id="qgrDbFo4jVuyFpX2xCFCjD">青简阁 · 文问</strong>
+        </div>
+      </div>
+      <div class="top-actions" data-page-node-id="XEKBe0x0vn9W0vFICHFq9F">
+        <label style="font-family:'ZCOOL XiaoWei',serif;font-size:12px;display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none;color:var(--mo-mid);margin-right:10px;letter-spacing:2px;" data-page-node-id="fkxMOn1OepUmLA3GAU4rrb">
+          <input type="checkbox" id="streamToggle" checked data-page-node-id="VakHa6dFosLewc51ef6lKU"> 流式
+        </label>
+        <span class="pill domain" data-page-node-id="dhYRtY76yHd4mynYPUmBN2"><span class="dot-live" data-page-node-id="fLNkkyE1JyUsNMI6MSyYuy"></span><span id="domainPill" data-page-node-id="36vNxsUiO5jfMYG2oJteHu">文旅</span></span>
+        <span class="pill" id="apiPill" data-page-node-id="6L2MaDA74Nns7wBUoV2eqV">服务 未连</span>
+        <button class="btn" id="btnTheme" title="切换水墨主题" data-page-node-id="uu2kDUOeqCaTCJsVKFzob2">墨</button>
+        <button class="btn" id="btnNew" data-page-node-id="by26BCiKTCG1aTS5riaiqH">新建</button>
+        <button class="btn" id="btnTrip" data-page-node-id="8syqv0bPeNhIqOGFGRApaN">行程</button>
+        <button class="btn" id="btnHistory" data-page-node-id="WfFDahUUpiXrrSnG7fWT06">历史</button>
+        <button class="btn" id="btnClear" data-page-node-id="K2DCEMUpxRscLNN4GxqQWp">清空</button>
+      </div>
+    </div>
+
+    <div class="chat" id="chat" data-page-node-id="mQ98y5Tj6kM6Wc2kLrXlyW">
+      <div class="dayline" data-page-node-id="utLBGFEHawyV2e2yK62WUQ">今日</div>
+      <div class="msg bot" data-page-node-id="Afus9BZp1lTS0yhEbJVwgc">
+        <div class="avatar bot" data-page-node-id="WzM1uDX4rpyaQF8PYYNu6x">问</div>
+        <div data-page-node-id="gUr7hkJ5XcsuC86i1GsckF">
+          <div class="bubble" data-page-node-id="DiI6FJ8QTOprufHui0mUFC">君好，我是青简阁文问。可问景点攻略、文化典故、行程规划，吾自当判别归路而答。<span class="tag tourism" data-page-node-id="dXv4A8kBKHL6RObr82WeRu">文旅</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="composer" data-page-node-id="VPxskdFsMM7TvAGe8peRPy">
+      <textarea id="input" placeholder="请录语（Enter 发送，Shift+Enter 换行）"></textarea>
+      <button class="send" id="send" data-page-node-id="MFRXEaHj2F0QfQ5wF2ouoO">发送</button>
+      <button class="send" id="stopBtn" style="display:none" data-page-node-id="CVEMLj4bDIZclvCu3nFYOV">停止</button>
+    </div>
+    <div class="hint" data-page-node-id="RZso6dwuEdT9e7c0timlXv">快捷键：<span class="kbd" data-page-node-id="OafMDQKduW7O6sUytDFWXB">Enter</span> 发送，<span class="kbd" data-page-node-id="nKVYHCornGoMHKhmuN6pPl">Shift</span>+<span class="kbd" data-page-node-id="IAcCCpwddYi0wqQ6AB3qoM">Enter</span> 换行</div>
+  </div>
+
+  <script>
+    const API_BASE = location.origin.startsWith('http') ? location.origin : 'http://127.0.0.1:8001';
+    const chatEl = document.getElementById('chat');
+    const inputEl = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
+    const stopBtn = document.getElementById('stopBtn');
+    const apiPill = document.getElementById('apiPill');
+    const domainPill = document.getElementById('domainPill');
+    const btnClear = document.getElementById('btnClear');
+    const streamToggle = document.getElementById('streamToggle');
+
+    const DOMAIN_LABEL = {
+      'tourism': '文旅',
+      'chitchat': '闲聊',
+      '': '未知',
+    };
+
+    // 节点名 → 用户友好中文短语（统一改写，避免暴露 node_xxx 等技术名）
+    const NODE_LABEL_MAP = {
+      'node_intent_route': '理解问题',
+      'node_attraction_confirm': '确认检索范围',
+      'node_search_embedding': '检索知识库',
+      'node_search_embedding_hyde': '扩展检索',
+      'node_web_search_mcp': '联网搜索参考',
+      'node_rrf': '整合检索结果',
+      'node_rerank': '精筛参考内容',
+      'node_answer_output': '撰写答案',
+      'node_chitchat_answer': '组织回答',
+      'node_datetime_answer': '获取当前时间',
+      'node_clarify': '澄清理解',
+      // 已是中文的也做归一
+      '切片搜索': '检索知识库',
+      '切片搜索(假设性文档)': '扩展检索',
+      '网络搜索': '联网搜索参考',
+      '倒排融合': '整合检索结果',
+      '重排序': '精筛参考内容',
+    };
+
+    function translateNodeName(name){
+      const s = String(name || '').trim();
+      if(!s) return '';
+      if(NODE_LABEL_MAP[s]) return NODE_LABEL_MAP[s];
+      // 兜底：去除 node_ 前缀并把下划线转空格，避免原样输出技术名
+      return s.replace(/^node_/, '').replace(/_/g, ' ');
+    }
+
+    // 把答案文本渲染成安全的 markdown HTML：
+    // 1) 去掉 LLM 常加的"（来源：第X块）"等引用标记（用户看不懂且不美观）
+    // 2) 用 marked 渲染 **加粗** / 列表 / 标题 / 代码块 等 markdown
+    // 3) 用 DOMPurify 清洗 HTML 防 XSS
+    // 4) CDN 加载失败时降级为纯文本（转义 + <br>）
+    function renderMarkdown(text){
+      let s = String(text || '');
+      // 去掉中文括号的"（来源：...）"标记，兼容全角冒号和半角冒号
+      s = s.replace(/（来源[:：][^）]*）/g, '');
+      // 去掉英文括号的"(来源:...)"标记
+      s = s.replace(/\(来源[:：][^)]*\)/g, '');
+      // 去掉行尾可能残留的"（参考：...）""（出处：...）"等同义标记
+      s = s.replace(/（(参考|出处|引自|参考来源)[:：][^）]*）/g, '');
+      s = s.replace(/\((参考|出处|引自|参考来源)[:：][^)]*\)/g, '');
+      // 剥离 GFM 删除线标记（~~文字~~）：LLM 偶发把天气/数字段包进 ~~，渲染成划线影响阅读；
+      // 这里去掉 ~~ 只保留文字内容（文字本身有效，直接按正文展示）
+      s = s.replace(/~{2,}/g, '');
+      // 清理去除标记后可能产生的多余空白行
+      s = s.replace(/\n{3,}/g, '\n\n');
+      // 用 marked 渲染 markdown
+      if(window.marked){
+        try{
+          marked.setOptions({ breaks: true, gfm: true });
+          let html = marked.parse(s);
+          if(window.DOMPurify){ html = window.DOMPurify.sanitize(html); }
+          return html;
+        }catch(_){ /* 降级 */ }
+      }
+      // 降级：纯文本转义 + 换行
+      return escapeHtml(s).replace(/\n/g, '<br>');
+    }
+
+    function newSessionId(){
+      return 'sess-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+
+    let sessionId = '';
+
+    // 会话 ID 初始化优先级：URL 参数（历史页跳转/强制新建）> 本地缓存 > 新生成
+    // 用完即用 replaceState 清掉 URL 参数，避免刷新后仍被强制切会话
+    (function initSession(){
+      const params = new URLSearchParams(location.search);
+      const urlSession = params.get('session') || '';
+      const forceNew = params.get('new') === '1';
+      let sid = forceNew ? '' : urlSession;
+      if (!sid) sid = localStorage.getItem('kb_session_id') || '';
+      if (!sid) sid = newSessionId();
+      localStorage.setItem('kb_session_id', sid);
+      sessionId = sid;
+      if (forceNew || urlSession) history.replaceState(null, '', location.pathname);
+    })();
+
+    function scrollToBottom(){ chatEl.scrollTop = chatEl.scrollHeight; }
+    // 判断用户是否已在聊天区底部附近（用于流式输出时决定是否自动跟随滚动）
+    function isUserNearBottom(threshold = 80){
+      return chatEl.scrollHeight - chatEl.scrollTop - chatEl.clientHeight < threshold;
+    }
+    function nowTime(){
+      const d = new Date();
+      return d.toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'});
+    }
+    function formatTime(ts){
+      if(!ts) return nowTime();
+      const d = new Date(Number(ts) * 1000);
+      if(Number.isNaN(d.getTime())) return nowTime();
+      return d.toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'});
+    }
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+        .replaceAll('"','&quot;').replaceAll("'","&#039;");
+    }
+    function domainTag(domain){
+      const d = domain || '';
+      if(!DOMAIN_LABEL[d]) return '';
+      return `<span class="tag ${d}">${DOMAIN_LABEL[d]}</span>`;
+    }
+    function isImageUrl(url){
+      try {
+        const u = new URL(url);
+        return /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(u.pathname);
+      } catch (e) {
+        return /\.(png|jpe?g|gif|webp|bmp|svg)(\?|#|$)/i.test(url || '');
+      }
+    }
+    function normalizeUrl(rawUrl){
+      const s = String(rawUrl || '').trim();
+      return s ? s.replace(/\s/g, '%20') : '';
+    }
+    function dedupeKeepOrder(arr){
+      const seen = new Set(); const out = [];
+      for(const x of (Array.isArray(arr) ? arr : [])){
+        const v = String(x || ''); if(!v) continue;
+        if(seen.has(v)) continue; seen.add(v); out.push(v);
+      }
+      return out;
+    }
+    function extractUrlsLoose(text){
+      const s = String(text || '');
+      const regex = /(https?:\/\/[^\s]+)/g;
+      const matches = s.match(regex) || [];
+      const urls = [];
+      const trimTailPunct = (u) => String(u || '').replace(/[)\]}'">，。,;；\]】）＞]+$/g, '');
+      const trimHeadPunct = (u) => String(u || '').replace(/^[<([{'"]+|^[＜（【\[]+/g, '');
+      for(const m of matches){
+        const u = trimHeadPunct(trimTailPunct(m));
+        if(u) urls.push(u);
+      }
+      return dedupeKeepOrder(urls);
+    }
+    function parseImagesFromTextLoosely(text){
+      return dedupeKeepOrder(extractUrlsLoose(text).filter(isImageUrl));
+    }
+    function findLastImageMarkerIndex(raw){
+      const s = String(raw || '');
+      const re = /【\s*图片\s*】|\[\s*图片\s*\]/g;
+      let m, lastIdx = -1, lastLen = 0;
+      while((m = re.exec(s)) !== null){ lastIdx = m.index; lastLen = m[0].length; }
+      return { idx: lastIdx, len: lastLen };
+    }
+    function parseAnswerAndImages(text){
+      const raw = String(text || '');
+      const { idx, len } = findLastImageMarkerIndex(raw);
+      if(idx === -1) return { text: raw, images: [] };
+      const before = raw.slice(0, idx).trimEnd();
+      const after = raw.slice(idx + len).trim();
+      const urls = [];
+      const lines = after.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      for(const line of lines){
+        if(line.startsWith('http://') || line.startsWith('https://')){ urls.push(line); }
+        else {
+          for(const u of extractUrlsLoose(line)) urls.push(u);
+        }
+      }
+      const seen = new Set(); const images = [];
+      for(const u of urls){
+        const normalized = normalizeUrl(u);
+        if(!isImageUrl(normalized) || seen.has(normalized)) continue;
+        seen.add(normalized); images.push(normalized);
+      }
+      return { text: before, images };
+    }
+    // ---------------- 行程地图（问题5）----------------
+    // 复用 trip.html 的高德 JS API 方案：按天着色打点 + 连线；Key 经 /trip/amap-js-key 下发。
+    let _amapLoaderPromise = null;
+    function loadAmapLoader(){
+      if(_amapLoaderPromise) return _amapLoaderPromise;
+      _amapLoaderPromise = fetch(`${API_BASE}/trip/amap-js-key`)
+        .then(r => r.json())
+        .then(cfg => {
+          if(!cfg || !cfg.configured || !cfg.key) throw new Error('未配置地图 Key');
+          const loaderReady = (window.AMapLoader)
+            ? Promise.resolve(window.AMapLoader)
+            : new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = 'https://webapi.amap.com/loader.js';
+                s.onload = () => resolve(window.AMapLoader);
+                s.onerror = () => reject(new Error('地图脚本加载失败'));
+                document.head.appendChild(s);
+              });
+          return loaderReady.then(AMapLoader => {
+            window._AMapSecurityConfig = { securityJsCode: cfg.securityJsCode || '' };
+            return AMapLoader.load({
+              key: cfg.key, version: '2.0',
+              plugins: ['AMap.Marker', 'AMap.Polyline', 'AMap.InfoWindow'],
+            });
+          });
+        })
+        .catch(e => { _amapLoaderPromise = null; throw e; });
+      return _amapLoaderPromise;
+    }
+    function renderMapBlock(containerEl, mapData){
+      if(!mapData || !mapData.ok || !Array.isArray(mapData.days) || mapData.days.length === 0) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'answer-map';
+      const inner = document.createElement('div');
+      inner.style.width = '100%'; inner.style.height = '100%';
+      const cid = 'amap-' + Math.random().toString(36).slice(2);
+      inner.id = cid;
+      wrap.appendChild(inner);
+      containerEl.appendChild(wrap);
+      const tip = document.createElement('div');
+      tip.className = 'answer-map-tip';
+      tip.textContent = '正在加载景点地图…';
+      containerEl.appendChild(tip);
+      loadAmapLoader().then(AMap => {
+        const map = new AMap.Map(cid, { zoom: 10, resizeEnable: true });
+        const colors = ['#667eea', '#e53e3e', '#38a169', '#dd6b20', '#d69e2e', '#9f7aea'];
+        let pointCount = 0;
+        (mapData.days || []).forEach((day, di) => {
+          const pts = (day.attractions || []).filter(a => typeof a.lon === 'number' && typeof a.lat === 'number');
+          if(!pts.length) return;
+          pointCount += pts.length;
+          pts.forEach(a => {
+            const marker = new AMap.Marker({
+              position: [a.lon, a.lat], offset: new AMap.Pixel(0, -30),
+              label: { content: day.label || ('第' + (di + 1) + '天'), direction: 'top' },
+            });
+            marker.on('click', () => {
+              const win = new AMap.InfoWindow({
+                content: '<div style="padding:4px 6px"><b>' + escapeHtml(a.name) + '</b><br/>' +
+                         escapeHtml(a.address || '') + '</div>',
+                offset: new AMap.Pixel(0, -30),
+              });
+              win.open(map, marker.getPosition());
+            });
+            map.add(marker);
+          });
+          if(pts.length > 1){
+            map.add(new AMap.Polyline({
+              path: pts.map(a => [a.lon, a.lat]),
+              strokeColor: colors[di % colors.length], strokeWeight: 5, strokeOpacity: 0.85,
+            }));
+          }
+        });
+        if(pointCount === 0){ wrap.remove(); tip.remove(); return; }
+        map.setFitView(null, false, [60, 60, 60, 60]);
+        tip.textContent = '已在地图标注行程景点（同色连线 = 同一天）；点击标记可查看景点信息。';
+      }).catch(e => {
+        tip.textContent = '地图未加载：' + (e && e.message ? e.message : '未知原因') + '（行程文字仍可正常阅读）';
+      });
+    }
+    function renderAnswerWithImages(containerEl, answerText, candidateImageUrls, mapData){
+      const { text, images: imagesFromBlock } = parseAnswerAndImages(answerText);
+      const candidates = Array.isArray(candidateImageUrls)
+        ? candidateImageUrls.map(normalizeUrl).filter(isImageUrl)
+        : [];
+      const hasBlockImages = imagesFromBlock && imagesFromBlock.length > 0;
+      const looseImages = extractUrlsLoose(answerText).map(normalizeUrl).filter(isImageUrl);
+      const shouldShow = hasBlockImages || (candidates.length > 0) || (looseImages.length > 0);
+      const allImages = new Set([
+        ...(hasBlockImages ? imagesFromBlock : []),
+        ...candidates,
+        ...looseImages,
+      ]);
+      const images = Array.from(allImages);
+      containerEl.textContent = '';
+      if((text || '').trim().length > 0){
+        const textEl = document.createElement('div');
+        textEl.className = 'answer-text';
+        // 用 markdown 渲染（去来源标记 + 加粗/列表/标题美化 + XSS 清洗）
+        textEl.innerHTML = renderMarkdown(text);
+        containerEl.appendChild(textEl);
+      } else {
+        const textEl = document.createElement('div');
+        textEl.className = 'answer-text';
+        textEl.textContent = '（已完成，但未返回答案）';
+        containerEl.appendChild(textEl);
+      }
+      if(images && images.length > 0){
+        const imgWrap = document.createElement('div');
+        imgWrap.className = 'answer-images';
+        for(const url of images){
+          const safeUrl = normalizeUrl(url);
+          const img = document.createElement('img');
+          img.loading = 'lazy'; img.src = safeUrl; img.alt = '参考图片';
+          img.referrerPolicy = 'no-referrer';
+          img.addEventListener('error', () => { img.style.display = 'none'; });
+          imgWrap.appendChild(img);
+          const link = document.createElement('a');
+          link.href = safeUrl; link.target = '_blank'; link.rel = 'noopener noreferrer';
+          link.textContent = url;
+          imgWrap.appendChild(link);
+        }
+        containerEl.appendChild(imgWrap);
+      }
+      // 行程类回答：正文/配图之后追加内嵌地图（无地图数据时该函数直接返回）
+      renderMapBlock(containerEl, mapData);
+    }
+    function addUserMsg(text){
+      const html = `
+        <div class="msg user">
+          <div>
+            <div class="bubble">${escapeHtml(text)}</div>
+            <div class="meta">${nowTime()}</div>
+          </div>
+          <div class="avatar">客</div>
+        </div>`;
+      chatEl.insertAdjacentHTML('beforeend', html);
+      scrollToBottom();
+    }
+    function addUserMsgWithTime(text, ts){
+      const html = `
+        <div class="msg user">
+          <div>
+            <div class="bubble">${escapeHtml(text)}</div>
+            <div class="meta">${formatTime(ts)}</div>
+          </div>
+          <div class="avatar">客</div>
+        </div>`;
+      chatEl.insertAdjacentHTML('beforeend', html);
+      scrollToBottom();
+    }
+    function addBotMsgWithTime(text, ts, imageUrls, domain, mapData){
+      const id = 'bot-his-' + Math.random().toString(36).slice(2);
+      const html = `
+        <div class="msg bot" id="${id}">
+          <div class="avatar bot">问</div>
+          <div>
+            <div class="bubble"><div class="answer"></div></div>
+            <div class="meta">${formatTime(ts)}${domainTag(domain)}</div>
+          </div>
+        </div>`;
+      chatEl.insertAdjacentHTML('beforeend', html);
+      const el = document.getElementById(id);
+      if(el){
+        const answerEl = el.querySelector('.answer');
+        renderAnswerWithImages(answerEl, text || '', imageUrls || [], mapData);
+      }
+      scrollToBottom();
+    }
+    function addBotMsgSkeleton(){
+      const id = 'bot-' + Math.random().toString(36).slice(2);
+      const html = `
+        <div class="msg bot" id="${id}">
+          <div class="avatar bot">问</div>
+          <div style="min-width: 180px;">
+            <div class="bubble">
+              <span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+              <details class="progress">
+                <summary>正在检索与组织…</summary>
+                <ul></ul>
+              </details>
+            </div>
+            <div class="meta">${nowTime()}</div>
+          </div>
+        </div>`;
+      chatEl.insertAdjacentHTML('beforeend', html);
+      scrollToBottom();
+      return document.getElementById(id);
+    }
+    function renderProgress(botMsgEl, doneList, runningList, status){
+      const details = botMsgEl.querySelector('details.progress');
+      if(!details) return;
+      const summary = details.querySelector('summary');
+      const ul = details.querySelector('ul');
+      const done = Array.isArray(doneList) ? doneList : [];
+      const running = Array.isArray(runningList) ? runningList : [];
+      const statusMap = {
+        'processing': '处理中', 'completed': '已完成', 'failed': '失败', 'pending': '等待中',
+      };
+      const displayStatus = statusMap[status] || status || 'unknown';
+      // summary 简化为更人话的文案，避免暴露技术状态
+      summary.textContent = `正在检索与组织…（已 ${done.length} / 共 ${done.length + running.length} · ${displayStatus}）`;
+      // 节点名统一翻译成中文短语，不再原样输出 node_xxx
+      const lines = [
+        ...done.map(x => `✅ ${translateNodeName(x)}`),
+        ...running.map(x => `⏳ ${translateNodeName(x)}`),
+      ];
+      ul.innerHTML = '';
+      if(lines.length === 0){
+        ul.insertAdjacentHTML('beforeend', '<li>暂无进度</li>');
+      } else {
+        for(const line of lines){ ul.insertAdjacentHTML('beforeend', `<li>${escapeHtml(line)}</li>`); }
+      }
+    }
+    function finalizeBotAnswer(botMsgEl, answer, error, imageUrls, domain, mapData){
+      const bubble = botMsgEl.querySelector('.bubble');
+      const progress = botMsgEl.querySelector('details.progress');
+      const err = (error || '').trim();
+      if(err){
+        const progressEl = progress;
+        if(progressEl){ progressEl.removeAttribute('open'); }
+        bubble.textContent = '';
+        const errEl = document.createElement('div');
+        errEl.className = 'answer';
+        errEl.textContent = `抱歉，本次处理失败：\n${err}`;
+        bubble.appendChild(errEl);
+        if(progressEl) bubble.appendChild(progressEl);
+        return;
+      }
+      const progressEl = progress;
+      if(progressEl){ progressEl.removeAttribute('open'); }
+      bubble.textContent = '';
+      const answerEl = document.createElement('div');
+      answerEl.className = 'answer';
+      bubble.appendChild(answerEl);
+      renderAnswerWithImages(answerEl, answer || '', imageUrls || [], mapData);
+      if(progressEl) bubble.appendChild(progressEl);
+      const meta = botMsgEl.querySelector('.meta');
+      if(meta) meta.insertAdjacentHTML('beforeend', domainTag(domain));
+      if(domain) domainPill.textContent = DOMAIN_LABEL[domain] || domain;
+    }
+    function showToast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => t.classList.remove('show'), 2400);
+    }
+
+    // 清空聊天区显示，仅保留首条欢迎语
+    function resetChatUI(){
+      const nodes = Array.from(chatEl.querySelectorAll('.msg'));
+      for(let i=1;i<nodes.length;i++) nodes[i].remove();
+      scrollToBottom();
+    }
+
+    async function apiHealth(){
+      try{
+        const res = await fetch(`${API_BASE}/health`);
+        if(!res.ok) throw new Error('health not ok');
+        apiPill.textContent = `服务 已连`;
+      }catch(e){
+        apiPill.textContent = `服务 未连`;
+      }
+    }
+    async function loadHistory(){
+      try{
+        const res = await fetch(`${API_BASE}/history/${sessionId}?limit=50`);
+        if(!res.ok) return;
+        const data = await res.json();
+        const items = Array.isArray(data.items) ? data.items : [];
+        if(items.length === 0) return;
+        // 后端 /history 已按 ts 正序返回（旧→新），直接按返回顺序渲染，无需反转
+        const nodes = Array.from(chatEl.querySelectorAll('.msg'));
+        for(let i=1;i<nodes.length;i++) nodes[i].remove();
+        for(const item of items){
+          if(item.role === 'user'){
+            addUserMsgWithTime(item.text || '', item.ts);
+          } else {
+            addBotMsgWithTime(item.text || '', item.ts, item.image_urls || [], item.domain, item.map_data || {});
+          }
+        }
+        scrollToBottom();
+      }catch(_){}
+    }
+    // ---- 生成状态与手动停止 ----
+    let activeES = null;          // 当前流式 EventSource
+    let activeSessionId = null;   // 当前查询会话 ID
+    let activeStopUI = null;      // {botMsgEl, answerEl, rawAnswerText} 停止时补提示
+
+    function setGenerating(generating, botMsgEl){
+      generating = !!generating;
+      sendBtn.style.display = generating ? 'none' : '';
+      sendBtn.disabled = generating;
+      stopBtn.style.display = generating ? '' : 'none';
+      if(!generating){
+        activeES = null;
+        activeStopUI = null;
+      }
+    }
+
+    async function stopGeneration(){
+      try{
+        if(activeSessionId){
+          await fetch(`${API_BASE}/stop/${activeSessionId}`, {method:'POST'});
+        }
+      }catch(_){}
+      if(activeES){
+        activeES.close();
+        activeES = null;
+      }
+      // 在当前回答气泡里追加停止提示
+      if(activeStopUI && activeStopUI.botMsgEl){
+        const {botMsgEl, answerEl, rawAnswerText} = activeStopUI;
+        const typing = botMsgEl.querySelector('.typing');
+        if(typing) typing.remove();
+        const progress = botMsgEl.querySelector('details.progress');
+        if(progress) progress.removeAttribute('open');
+        if(answerEl){
+          const shown = rawAnswerText || answerEl.textContent || '';
+          renderAnswerWithImages(answerEl, (shown ? shown + '\n\n' : '') + '（已停止生成）', []);
+          if(isUserNearBottom()) scrollToBottom();
+        }
+      }
+      setGenerating(false);
+    }
+
+    stopBtn.addEventListener('click', stopGeneration);
+
+    async function submitQuery(text){
+      const isStream = streamToggle.checked;
+      const res = await fetch(`${API_BASE}/query`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ query: text, session_id: sessionId, is_stream: isStream })
+      });
+      if(!res.ok){ throw new Error(await res.text() || '请求失败'); }
+      return await res.json();
+    }
+    async function onSend(){
+      const text = (inputEl.value || '').trim();
+      if(!text) return;
+      // 生成中不允许发起新查询（发送按钮此时隐藏，仅停止按钮可见）
+      if(stopBtn.style.display !== 'none') return;
+      inputEl.value = '';
+      addUserMsg(text);
+      const botMsgEl = addBotMsgSkeleton();
+      setGenerating(true, botMsgEl);
+      try{
+        const isStream = streamToggle.checked;
+        const data = await submitQuery(text);
+        renderProgress(botMsgEl, [], [], 'pending');
+
+        if (!isStream) {
+          renderProgress(botMsgEl, data.done_list || [], [], 'completed');
+          finalizeBotAnswer(botMsgEl, data.answer, data.error, data.image_urls || [], data.domain, data.map_data || {});
+          setGenerating(false);
+          return;
+        }
+
+        const { session_id } = data;
+        const bubble = botMsgEl.querySelector('.bubble');
+        let answerEl = bubble.querySelector('.answer');
+        if(!answerEl){
+          answerEl = document.createElement('div');
+          answerEl.className = 'answer';
+          bubble.insertBefore(answerEl, bubble.firstChild);
+        }
+
+        const es = new EventSource(`${API_BASE}/stream/${session_id}`);
+        activeES = es;
+        activeSessionId = session_id;
+        activeStopUI = {botMsgEl, answerEl, rawAnswerText: ''};
+        let rawAnswerText = '';
+
+        es.addEventListener('progress', (e) => {
+          try{
+            const d = JSON.parse(e.data || '{}');
+            renderProgress(botMsgEl, d.done_list, d.running_list, d.status);
+            if(d && d.status === 'completed'){
+              const typing = botMsgEl.querySelector('.typing');
+              if(typing) typing.remove();
+              setGenerating(false);
+            }
+          }catch(_){}
+        });
+
+        es.addEventListener('delta', (e) => {
+          try{
+            const d = JSON.parse(e.data || '{}');
+            const delta = d.delta || '';
+            if(delta){
+              rawAnswerText += delta;
+              if(activeStopUI) activeStopUI.rawAnswerText = rawAnswerText;
+              renderAnswerWithImages(answerEl, rawAnswerText, []);
+              // 仅当用户已在底部附近时才自动跟随滚动，用户主动上拉阅读时不再强拉
+              if(isUserNearBottom()) scrollToBottom();
+            }
+          }catch(_){}
+        });
+
+        es.addEventListener('final', (e) => {
+          const typing = botMsgEl.querySelector('.typing');
+          if(typing) typing.remove();
+          const progress = botMsgEl.querySelector('details.progress');
+          if(progress) progress.removeAttribute('open');
+          try{
+            const d = JSON.parse(e.data || '{}');
+            const finalText = (d && typeof d.answer === 'string' && d.answer.trim().length > 0) ? d.answer : (rawAnswerText || answerEl.textContent || '');
+            renderAnswerWithImages(answerEl, finalText, d.image_urls || []);
+            finalizeBotAnswer(botMsgEl, finalText, null, d.image_urls || [], d.domain, d.map_data || {});
+            if(isUserNearBottom()) scrollToBottom();
+          }catch(_){}
+          es.close();
+          setGenerating(false);
+        });
+
+        es.addEventListener('final_answer', (e) => {
+          const typing = botMsgEl.querySelector('.typing');
+          if(typing) typing.remove();
+          const progress = botMsgEl.querySelector('details.progress');
+          if(progress) progress.removeAttribute('open');
+          try{
+            const d = JSON.parse(e.data || '{}');
+            const finalText = (d && typeof d.answer === 'string' && d.answer.trim().length > 0) ? d.answer : (rawAnswerText || answerEl.textContent || '');
+            renderAnswerWithImages(answerEl, finalText, d.image_urls || []);
+            finalizeBotAnswer(botMsgEl, finalText, null, d.image_urls || [], d.domain, d.map_data || {});
+            if(isUserNearBottom()) scrollToBottom();
+          }catch(_){}
+          es.close();
+          setGenerating(false);
+        });
+
+        es.addEventListener('error', (e) => {
+          const typing = botMsgEl.querySelector('.typing');
+          if(typing) typing.remove();
+          const progress = botMsgEl.querySelector('details.progress');
+          if(progress) progress.removeAttribute('open');
+          try{
+            const msg = e && e.data ? (JSON.parse(e.data).error || 'SSE 连接中断/失败') : 'SSE 连接中断/失败';
+            rawAnswerText += `\n\n（错误：${msg}）`;
+            renderAnswerWithImages(answerEl, rawAnswerText, []);
+            if(isUserNearBottom()) scrollToBottom();
+          }catch(_){
+            rawAnswerText += `\n\n（错误：SSE 连接中断/失败）`;
+            renderAnswerWithImages(answerEl, rawAnswerText, []);
+            if(isUserNearBottom()) scrollToBottom();
+          }
+          es.close();
+          setGenerating(false);
+        });
+      }catch(e){
+        const bubble = botMsgEl.querySelector('.bubble');
+        const progress = botMsgEl.querySelector('details.progress');
+        const typing = botMsgEl.querySelector('.typing');
+        if(typing) typing.remove();
+        bubble.innerHTML = `请求失败：${escapeHtml(e.message || e)}\n\n` + progress.outerHTML;
+        setGenerating(false);
+      }
+    }
+
+    sendBtn.addEventListener('click', onSend);
+    inputEl.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); onSend(); }
+    });
+    btnClear.addEventListener('click', async () => {
+      if(stopBtn.style.display !== 'none'){ showToast('正在生成回答，请先停止或等待完成'); return; }
+      if(!confirm('确定要清空当前对话吗？\n将同时删除服务端保存的本次对话上下文记录，无法恢复。')) return;
+      btnClear.disabled = true;
+      let ok = false;
+      try {
+        const res = await fetch(`${API_BASE}/history/${sessionId}`, { method: 'DELETE' });
+        ok = res.ok;
+      } catch(e) { ok = false; }
+      btnClear.disabled = false;
+      resetChatUI();
+      if(ok){
+        // 清空后启用全新会话 ID：彻底告别旧上下文（旧会话记录已从服务端删除）
+        sessionId = newSessionId();
+        localStorage.setItem('kb_session_id', sessionId);
+        showToast('已清空：界面与服务端上下文均已删除');
+      } else {
+        showToast('服务端清空失败（服务未连接？），仅清空了界面显示');
+      }
+    });
+
+    // 新建对话：开启全新会话（旧会话保留，可在"历史"页找回）
+    const btnNew = document.getElementById('btnNew');
+    btnNew.addEventListener('click', () => {
+      if(stopBtn.style.display !== 'none'){ showToast('正在生成回答，请先停止或等待完成'); return; }
+      sessionId = newSessionId();
+      localStorage.setItem('kb_session_id', sessionId);
+      resetChatUI();
+      showToast('已开启新对话');
+    });
+
+    // 历史会话管理页
+    document.getElementById('btnHistory').addEventListener('click', () => {
+      location.href = '/history-page';
+    });
+
+    // 行程规划页：跳转到结构化行程规划（后端 /trip/plan 已在 query_server 挂载）
+    document.getElementById('btnTrip').addEventListener('click', () => {
+      location.href = '/trip-page';
+    });
+
+    /* ===== 水墨 / 青瓷双主题切换（localStorage 记忆，key=web_theme，与导入页共用） ===== */
+    const THEME_KEY = 'web_theme';
+    function applyTheme(theme) {
+      const ink = theme === 'ink';
+      document.documentElement.classList.toggle('ink-theme', ink);
+      const btn = document.getElementById('btnTheme');
+      if (btn) {
+        btn.textContent = ink ? '纸' : '墨';
+        btn.title = ink ? '切回青瓷主题' : '切换水墨主题';
+      }
+    }
+    (function initTheme() {
+      let ink = false;
+      try { ink = localStorage.getItem(THEME_KEY) === 'ink'; } catch (e) {}
+      applyTheme(ink ? 'ink' : 'classic');
+    })();
+    document.getElementById('btnTheme').addEventListener('click', () => {
+      const next = document.documentElement.classList.contains('ink-theme') ? 'classic' : 'ink';
+      try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+      applyTheme(next);
+    });
+
+    apiHealth();
+    setInterval(apiHealth, 5000);
+    loadHistory();
+    setTimeout(() => inputEl.focus(), 200);
+  </script>
+</body>
+</html>

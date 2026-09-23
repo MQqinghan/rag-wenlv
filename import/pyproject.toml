@@ -1,0 +1,55 @@
+[project]
+name = "myproject"
+version = "0.1.0"
+requires-python = ">=3.13"
+# A1 依赖分组（2026-09-09）：默认组 = 共享底座（导入/查询两侧都必需）。
+# 导入侧专属包见下方 [project.optional-dependencies] import 组。
+# 安装约定（uv）：
+#   uv sync                → 仅共享底座（查询侧部署单元）
+#   uv sync --extra import → 共享底座 + 导入侧（导入侧部署单元）
+#   uv sync --all-extras   → 全量（本地开发用，保持原有全量环境）
+dependencies = [
+    "pymilvus[model]",
+    "FlagEmbedding>=1.3.5",
+    "modelscope>=1.39.1",
+    "transformers>=5.16.1",
+    "torch>=2.5.0",          # 2.5.x+ 才有完善的 cp313 支持
+    "torchvision>=0.20.0",   # 0.20.x 对应 torch 2.5.x，且有 cp313 wheel
+    "torchaudio>=2.5.0",     # 与 torch 同版本系列
+    "fastapi>=0.141.1",
+    "uvicorn[standard]>=0.52.4",
+    "python-multipart>=0.0.32",
+    "python-dotenv>=1.2.3",
+    "minio>=7.2.20",
+    "redis>=8.1.0",
+]
+
+[project.optional-dependencies]
+# 导入侧专属依赖（仅导入进程需要；部署导入侧时 --extra import）
+import = [
+    "pandas>=2.2",           # 表格解析（tabular_parse_service）
+    "openpyxl>=3.1",         # Excel 读取引擎（pandas 依赖）
+    "requests>=2.31",        # MinerU 文档解析云服务上传/下载（pdf_parse_service）
+]
+
+[tool.uv.sources]
+# 强制从 NVIDIA 源安装
+torch = { index = "pytorch-cuda" }
+torchvision = { index = "pytorch-cuda" }
+torchaudio = { index = "pytorch-cuda" }
+
+[[tool.uv.index]]
+name = "tsinghua"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
+
+# 【新增】声明 PyTorch CUDA 源
+[[tool.uv.index]]
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[dependency-groups]
+dev = [
+    "fakeredis>=2.38.0",
+]

@@ -1,0 +1,30 @@
+# ===== 敏感配置：绝不上传 =====
+# 本层为共享基础设施单一真源，密钥一律由各域 .env 提供，此处不应存在 .env
+.env
+
+# ===== Python / 虚拟环境 =====
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# ===== IDE 本地配置 =====
+.idea/
+
+# ===== 运行产物 / 日志 / 缓存 =====
+logs/
+output/
+*.log
+
+# ===== 本地 AI 助手工作数据 =====
+.workbuddy/
+
+# ===== 驱动 / 系统残留 =====
+NVIDIA Corporation/
+
+# ===== OS 垃圾 =====
+.DS_Store
+Thumbs.db

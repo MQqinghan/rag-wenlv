@@ -1,0 +1,843 @@
+{
+  "meta": {
+    "version": "v9",
+    "created": "2026-09-04",
+    "note": "单域评测集（文旅 + 行程规划 + 闲聊，33 条）。v7：收敛为纯文旅单域——下架 4 条不再适用的用例（xr-001~004）及相关标签；xr-009 归入文旅 fact。金标 file_title 与 golden_facts 均对 Milvus 文旅库 chunk 原文逐条核对。构成：文旅 14（tr-001~013 + cl-001）、规划 5（plan-001~005）、澄清 2（cl-002/cl-003）、负例 6（neg-001~006）、概念类 1（xr-009）。v8：新增关系类 5 条（rel-001~005：以景点/片区/景区为主体提问、答案落在住宿文档），新增 tag relation；未纳入 core_set，避免拖慢日常门禁。v9：新增抗字面重叠硬多跳 5 条（rel-006~010，查询主体词在答案文档中零出现，BM25 无法直接命中，用于判定关系扩展是否真有增量）。",
+    "case_total": 38,
+    "pos_total": 30,
+    "neg_total": 6,
+    "clarify_total": 2,
+    "layers": [
+      "retrieval",
+      "answer"
+    ],
+    "tag_schema": {
+      "core": "core 核心基线集（日常改动必跑）",
+      "routing": "路由判定敏感（is_plan/指代/域外拦截；改 intent_route_service 与路由正则必跑）",
+      "retrieval": "检索与重排敏感（改 embedding/bm25/rerank/集合必跑）",
+      "generation": "答案生成敏感（改 answer prompt / answer_output_service 必跑）",
+      "plan": "行程规划敏感（改 itinerary/trip_plan 必跑）",
+      "web": "判定依赖联网结果（改 web 链路 / T15 source_policy 门禁必跑）",
+      "guard": "拒答与闲聊护栏（改负类/澄清判定必跑）",
+      "clarify": "澄清类",
+      "refuse": "拒答类",
+      "tourism": "文旅域",
+      "chitchat": "闲聊域",
+      "relation": "跨类型关系检索敏感（改关系字段/扩展路必跑）"
+    },
+    "core_set": [
+      "cl-002",
+      "cl-003",
+      "neg-001",
+      "neg-002",
+      "neg-003",
+      "neg-006",
+      "plan-002",
+      "plan-003",
+      "tr-001",
+      "tr-005",
+      "tr-013",
+      "xr-009"
+    ]
+  },
+  "cases": [
+    {
+      "id": "tr-001",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "第一次去成都，主城区有哪些值得体验的区域？",
+      "golden_file_titles": [
+        "成都景点推荐"
+      ],
+      "golden_facts": [
+        "春熙路/太古里偏现代城市中心",
+        "宽窄巷子/人民公园属老城与茶馆慢生活",
+        "武侯祠与锦里是历史文化街区",
+        "熊猫基地是成都标志性体验"
+      ],
+      "expect_type": "answer",
+      "difficulty": "mid",
+      "notes": "内容来自成都景点推荐文件，验证多 chunk 融合概括",
+      "tags": [
+        "core",
+        "generation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "tr-002",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "在成都想吃地道美食，应该按什么类型去找？",
+      "golden_file_titles": [
+        "成都美食推荐"
+      ],
+      "golden_facts": [
+        "成都美食核心体验包括火锅、串串、川味小吃与茶馆文化",
+        "可按重辣重麻/中辣平衡/小吃/社区/茶馆休闲等类型选择"
+      ],
+      "expect_type": "answer",
+      "difficulty": "mid",
+      "notes": "美食分类信息验证",
+      "tags": [
+        "generation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "tr-003",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "从昆明到大理再到丽江，城市之间怎么转场最方便？",
+      "golden_file_titles": [
+        "云南交通指南"
+      ],
+      "golden_facts": [
+        "高铁是云南自由行最稳定的城市间转场方式，适合昆明-大理-丽江主线段"
+      ],
+      "expect_type": "answer",
+      "difficulty": "easy",
+      "notes": "交通指南类直接命中",
+      "tags": [
+        "generation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "tr-004",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "到丽江之后，从机场/车站怎么去古城和周边景点？",
+      "golden_file_titles": [
+        "云南交通指南"
+      ],
+      "golden_facts": [
+        "丽江三义机场和丽江站是主要入口",
+        "到古城、束河、白沙和玉龙雪山需结合住宿位置与行李情况"
+      ],
+      "expect_type": "answer",
+      "difficulty": "hard",
+      "notes": "验证主体（丽江）确认后进交通指南子主题检索",
+      "tags": [
+        "generation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "tr-005",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "第一次去三亚，景点是分散的吗？该怎么分东线西线玩？",
+      "golden_file_titles": [
+        "三亚景点推荐"
+      ],
+      "golden_facts": [
+        "三亚景点围绕不同湾区和方向展开，大致分成东线和西线两组：东线偏海湾、离岛、度假酒店和海上活动",
+        "西线更适合天涯海角、南山这类传统观光组合；蜈支洲岛属需整天安排的离岛体验"
+      ],
+      "expect_type": "answer",
+      "difficulty": "mid",
+      "notes": "东西线结构化信息来自三亚景点推荐原文",
+      "tags": [
+        "core",
+        "generation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "tr-006",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "三亚住哪个湾比较好？怎么选？",
+      "golden_file_titles": [
+        "三亚住宿推荐"
+      ],
+      "golden_facts": [
+        "三亚住宿本质是选这次旅行把生活重心放在哪个湾区",
+        "亚龙湾适合亲子、情侣和重视完整度假感的人；海棠湾偏高端度假、适合免税购物联动；重视便利和过渡选三亚湾"
+      ],
+      "expect_type": "answer",
+      "difficulty": "mid",
+      "notes": "湾区选择逻辑来自三亚住宿推荐原文『亚龙湾/海棠湾/三亚湾怎么选』区块",
+      "tags": [
+        "generation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "tr-007",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "去厦门鼓浪屿，交通上有什么要注意的？",
+      "golden_file_titles": [
+        "厦门交通指南"
+      ],
+      "golden_facts": [
+        "前往鼓浪屿必须通过轮渡上岛，要先到指定码头完成购票候船等流程",
+        "轮渡的码头、航线和班次会调整，出发前要提前确认；岛上以步行为主，不适合带大件行李高频往返"
+      ],
+      "expect_type": "answer",
+      "difficulty": "easy",
+      "notes": "交通注意事项来自厦门交通指南原文",
+      "tags": [
+        "generation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "tr-008",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "第一次去杭州，景点应该怎么安排？",
+      "golden_file_titles": [
+        "杭州景点推荐"
+      ],
+      "golden_facts": [
+        "西湖是杭州景点体系的绝对核心，是一整片适合慢慢拆开的城市景观区，应围绕西湖建立核心",
+        "再向灵隐、龙井、河坊街等片区延展，景点层次更完整"
+      ],
+      "expect_type": "answer",
+      "difficulty": "mid",
+      "notes": "城市慢游结构来自杭州景点推荐原文",
+      "tags": [
+        "generation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "tr-009",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "川西小环线5天自驾怎么走？",
+      "golden_file_titles": [
+        "川西小环线5天深度旅游攻略"
+      ],
+      "golden_facts": [
+        "路线为成都→康定→新都桥→塔公→丹巴→四姑娘山→成都",
+        "Day1 为成都→康定→折多山→新都桥，新都桥被誉为摄影天堂"
+      ],
+      "expect_type": "answer",
+      "difficulty": "mid",
+      "notes": "自驾路线事实来自攻略原文行程概览表",
+      "tags": [
+        "generation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "tr-010",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "新疆北疆环线自驾，什么时候去最好？",
+      "golden_file_titles": [
+        "新疆北疆环线10天自驾攻略"
+      ],
+      "golden_facts": [
+        "夏季7-8月草原碧绿、野花盛开、独库公路开放，是避暑首选",
+        "秋季9-10月喀纳斯、禾木白桦林金黄，是摄影最佳季节"
+      ],
+      "expect_type": "answer",
+      "difficulty": "easy",
+      "notes": "最佳旅游时间表来自攻略原文",
+      "tags": [
+        "generation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "tr-011",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "去云南旅行，有什么代表性美食？",
+      "golden_file_titles": [
+        "云南美食推荐"
+      ],
+      "golden_facts": [
+        "云南美食不是单一城市，而是按昆明、大理、丽江和西双版纳的旅行路线分别体验不同风味",
+        "昆明型以过桥米线、鲜花饼和城市小吃为主线；大理型是白族风味、乳扇、喜洲粑粑；西双版纳方向体验傣味、菠萝饭和香茅草烤鱼"
+      ],
+      "expect_type": "answer",
+      "difficulty": "mid",
+      "notes": "多城市美食体系来自云南美食推荐原文",
+      "tags": [
+        "generation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "tr-012",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "第一次去成都，住在哪个片区比较方便？",
+      "golden_file_titles": [
+        "成都住宿推荐"
+      ],
+      "golden_facts": [
+        "第一次来成都，最稳的通常是春熙路和太古里",
+        "喜欢老城气质选宽窄巷子和人民公园周边；要赶高铁或飞机选南站、金融城等更偏功能型的区域"
+      ],
+      "expect_type": "answer",
+      "difficulty": "mid",
+      "notes": "住宿片区逻辑来自成都住宿推荐原文，与 tr-001 景点区分（考察子类型路由）",
+      "tags": [
+        "generation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "tr-013",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "预算不多，7、8月份有哪些适合穷游的城市？",
+      "golden_file_titles": [
+        "7-8月最适合穷游的10个宝藏城市"
+      ],
+      "golden_facts": [
+        "六盘水有中国凉都之称，7-8月平均气温仅19℃左右，郊区民宿80-100元一晚",
+        "大同夏季清爽凉快，老城民宿80元左右、公交仅2元；重庆近郊清凉且洪崖洞等网红地标免费"
+      ],
+      "expect_type": "answer",
+      "difficulty": "hard",
+      "notes": "跨城市泛推荐：无单一城市主体，考察泛化查询能否命中榜单类文件；城市与数字取自原文",
+      "tags": [
+        "core",
+        "generation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "plan-001",
+      "domain": "plan",
+      "intent": "plan",
+      "query": "我在成都天府机场，怎么到市区？到市区后怎么规划游览路线？",
+      "golden_file_titles": [
+        "成都交通指南",
+        "成都景点推荐"
+      ],
+      "golden_facts": [
+        "行程出发点应是成都天府机场，目的地是成都市区",
+        "不得默认从深圳/其他城市出发或编排跨城往返",
+        "机场到市区与市区游玩建议应基于成都本地资料（交通：地铁18号线等衔接市区；游玩：春熙路/宽窄巷子/武侯祠/熊猫基地等片区）"
+      ],
+      "expect_type": "plan",
+      "difficulty": "hard",
+      "notes": "回归用例：对应 docs/问题记录与改进清单.md 需求A——必须解析出发地=成都天府机场，禁止脑补出发地/天数矛盾。P0-2 修复后走 A 形态（已抵达，未提返程，禁返程段）。需天气+路线工具或明确降级。",
+      "tags": [
+        "generation",
+        "plan",
+        "routing"
+      ]
+    },
+    {
+      "id": "plan-002",
+      "domain": "plan",
+      "intent": "plan",
+      "query": "我想去云南玩 5 天，昆明、大理、丽江怎么安排比较顺？",
+      "golden_file_titles": [
+        "云南线路推荐",
+        "云南交通指南"
+      ],
+      "golden_facts": [
+        "行程应体现昆明-大理-丽江主线段与高铁转场",
+        "不得编造具体班次/时刻等资料中不存在的细节"
+      ],
+      "expect_type": "plan",
+      "difficulty": "mid",
+      "notes": "规划类含知识库支撑（无天气/路线工具时允许降级 ok=False）",
+      "tags": [
+        "core",
+        "generation",
+        "plan",
+        "routing"
+      ]
+    },
+    {
+      "id": "plan-003",
+      "domain": "plan",
+      "intent": "plan",
+      "query": "我下周从深圳出发去三亚玩 5 天，行程怎么安排比较好？",
+      "golden_file_titles": [
+        "三亚线路推荐",
+        "三亚交通指南"
+      ],
+      "golden_facts": [
+        "出发地深圳、目的地三亚，属于跨城规划（B形态），行程应覆盖首日出发与末日返程",
+        "三亚5日安排应基于先住稳、东线西线分开的结构（海湾/离岛与天涯海角、南山等西线分天）",
+        "不得编造具体航班班次/时刻等资料中不存在的细节"
+      ],
+      "expect_type": "plan",
+      "difficulty": "hard",
+      "notes": "回归 P0-2 B 形态：『从X出发去Y玩N天』跨城规划，须覆盖出发/返程，与 plan-001/005 的 A 形态对照。需天气+路线工具或明确降级。",
+      "tags": [
+        "core",
+        "generation",
+        "plan",
+        "routing"
+      ]
+    },
+    {
+      "id": "plan-004",
+      "domain": "plan",
+      "intent": "plan",
+      "query": "想去厦门玩两三天，鼓浪屿和市区怎么安排？",
+      "golden_file_titles": [
+        "厦门线路推荐",
+        "厦门景点推荐"
+      ],
+      "golden_facts": [
+        "2天适合只保留本岛老城加鼓浪屿主线；3天可把海边城市漫游感补完整",
+        "鼓浪屿和中山路是第一优先级，环岛路、曾厝垵、沙坡尾作为补充",
+        "不得编造具体船票班次等资料中不存在的细节"
+      ],
+      "expect_type": "plan",
+      "difficulty": "mid",
+      "notes": "短途规划，金标为线路+景点双源",
+      "tags": [
+        "generation",
+        "plan",
+        "routing"
+      ]
+    },
+    {
+      "id": "plan-005",
+      "domain": "plan",
+      "intent": "plan",
+      "query": "我到张家界市区了，接下来天门山和森林公园怎么安排着玩？",
+      "golden_file_titles": [
+        "张家界景点推荐",
+        "张家界交通指南"
+      ],
+      "golden_facts": [
+        "行程出发点是张家界市区（A形态：已在当地且未提返程），不得编排跨城往返或返程段",
+        "天门山偏市区近郊，森林公园在武陵源方向，两者不是同一区域，不应硬排同一天",
+        "只有2-3天游玩时间时不建议在市区和武陵源之间频繁换住区"
+      ],
+      "expect_type": "plan",
+      "difficulty": "hard",
+      "notes": "回归 P0-2 A 形态：『我到了X』且未提返程——只规划当地行程、禁返程段/返程日期/返程交通，与 plan-003 的 B 形态对照。需天气+路线工具或明确降级。",
+      "tags": [
+        "generation",
+        "plan",
+        "routing"
+      ]
+    },
+    {
+      "id": "cl-001",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "去张家界玩，住哪里比较好？",
+      "golden_file_titles": [
+        "张家界住宿推荐"
+      ],
+      "golden_facts": [],
+      "expect_type": "answer",
+      "difficulty": "mid",
+      "notes": "主体（张家界）明确应直答住宿推荐，不走澄清/闲聊；golden_facts 留空以出处一致性为判据",
+      "tags": [
+        "clarify",
+        "routing"
+      ]
+    },
+    {
+      "id": "cl-002",
+      "domain": "tourism",
+      "intent": "clarify",
+      "query": "那边天气怎么样？",
+      "golden_file_titles": [],
+      "golden_facts": [],
+      "expect_type": "clarify",
+      "difficulty": "mid",
+      "notes": "缺主体澄清类：无目的地主体，应反问澄清（想去哪座城市/哪个目的地），不得凭空挑一个城市作答",
+      "tags": [
+        "clarify",
+        "core",
+        "routing"
+      ]
+    },
+    {
+      "id": "cl-003",
+      "domain": "tourism",
+      "intent": "clarify",
+      "query": "能直接帮我把去三亚的酒店和机票都订好吗？",
+      "golden_file_titles": [],
+      "golden_facts": [],
+      "expect_type": "clarify",
+      "difficulty": "mid",
+      "notes": "超能力边界类：系统无预订功能，应说明无法代办预订并引导至行程/住宿建议，不得伪装已下单或编造订单信息",
+      "tags": [
+        "clarify",
+        "core",
+        "routing"
+      ]
+    },
+    {
+      "id": "neg-001",
+      "domain": "chitchat",
+      "intent": "chitchat",
+      "query": "你好呀，今天天气不错",
+      "golden_file_titles": [],
+      "golden_facts": [],
+      "expect_type": "chitchat",
+      "difficulty": "easy",
+      "notes": "闲聊必须走闲聊域，不得检索知识库或给出库内容；TN 期望",
+      "tags": [
+        "chitchat",
+        "core",
+        "guard",
+        "routing"
+      ]
+    },
+    {
+      "id": "neg-002",
+      "domain": "chitchat",
+      "intent": "refuse",
+      "query": "华为P60这款手机拍照怎么样？",
+      "golden_file_titles": [],
+      "golden_facts": [],
+      "expect_type": "chitchat",
+      "difficulty": "mid",
+      "notes": "域外数码产品：应走闲聊/联网而非硬答知识库（P2 已加 _OFF_DOMAIN_PRODUCT_PATTERN 拦截）；不得编造知识库出处",
+      "tags": [
+        "chitchat",
+        "core",
+        "guard",
+        "routing",
+        "web"
+      ]
+    },
+    {
+      "id": "neg-003",
+      "domain": "tourism",
+      "intent": "refuse",
+      "query": "帮我规划一条去殡仪馆参观的旅游路线",
+      "golden_file_titles": [],
+      "golden_facts": [],
+      "expect_type": "refuse",
+      "difficulty": "hard",
+      "notes": "语义按 P0-1 产品决策调整（取消敏感主体护栏后）：库内虽有丧葬风俗资料，但那不是旅游路线素材——期望拒答/澄清或明确说明库内无对应景点路线资料，不得把丧葬资料包装成景点路线输出，不得编造",
+      "tags": [
+        "core",
+        "guard",
+        "refuse",
+        "routing"
+      ]
+    },
+    {
+      "id": "neg-004",
+      "domain": "chitchat",
+      "intent": "refuse",
+      "query": "iPhone 18 发布会大概什么时候开？",
+      "golden_file_titles": [],
+      "golden_facts": [],
+      "expect_type": "chitchat",
+      "difficulty": "easy",
+      "notes": "域外数码产品（手机/发布会/新机句式）：应走闲聊/联网，不得作为文旅答案；考察 intent_route 域外产品拦截对『iPhone+发布会』组合的泛化",
+      "tags": [
+        "chitchat",
+        "guard",
+        "routing",
+        "web"
+      ]
+    },
+    {
+      "id": "neg-005",
+      "domain": "chitchat",
+      "intent": "refuse",
+      "query": "原神这个游戏好玩吗？",
+      "golden_file_titles": [],
+      "golden_facts": [],
+      "expect_type": "chitchat",
+      "difficulty": "hard",
+      "notes": "hard 负例：库内虽有《原神游戏介绍》文件，但游戏评测不属于文旅域，期望走闲聊/联网，不得给出文旅域答案或引用该文件作答",
+      "tags": [
+        "chitchat",
+        "guard",
+        "routing",
+        "web"
+      ]
+    },
+    {
+      "id": "neg-006",
+      "domain": "plan",
+      "intent": "refuse",
+      "query": "帮我规划一个去马尔代夫7天的旅游行程",
+      "golden_file_titles": [],
+      "golden_facts": [],
+      "expect_type": "refuse",
+      "difficulty": "hard",
+      "notes": "规划负例（无资料不编造）：库内无马尔代夫目的地资料（世界各国著名旅游景点仅覆盖冰岛/日本/瑞士/新西兰/挪威/葡萄牙/克罗地亚/摩洛哥/格鲁吉亚等，欧洲篇无马尔代夫），期望说明库内无该目的地资料/拒答或澄清，不得编造行程细节伪装有来源",
+      "tags": [
+        "core",
+        "guard",
+        "refuse",
+        "routing"
+      ]
+    },
+    {
+      "id": "xr-009",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "最近老听人说「文旅是第十艺术」，这到底是什么意思？",
+      "golden_file_titles": [
+        "文旅正在成为第十艺术"
+      ],
+      "golden_facts": [
+        "文学、音乐、舞蹈、绘画、雕塑、建筑、戏剧、电影是公认的八大艺术，游戏被称作第九艺术",
+        "文旅被视作一种集空间、叙事、表演、互动与生活方式于一体的全新体验形态，综合、开放、在场、面向大众"
+      ],
+      "expect_type": "answer",
+      "difficulty": "medium",
+      "notes": "C类边界：文旅概念解读（非行程规划），期望路由判 tourism 但不置 is_plan；答案须准确说明八大艺术/第九艺术/第十艺术的定义链条",
+      "tags": [
+        "core",
+        "tourism",
+        "generation",
+        "routing"
+      ],
+      "golden_facts_sets": [
+        [
+          "文学、音乐、舞蹈、绘画、雕塑、建筑、戏剧、电影是公认的八大艺术，游戏被称作第九艺术",
+          "文旅被视作一种集空间、叙事、表演、互动与生活方式于一体的全新体验形态，综合、开放、在场、面向大众"
+        ],
+        [
+          "艺术层级上八大艺术为文学/音乐/舞蹈/绘画/雕塑/建筑/戏剧/电影，游戏称第九艺术",
+          "文旅因融合空间叙事表演互动被称为第十艺术（综合开放、面向大众）"
+        ]
+      ]
+    },
+    {
+      "id": "rel-001",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "想在杭州步行逛西湖、晚上也想有城市生活，住西湖哪一侧更合适？",
+      "golden_file_titles": [
+        "杭州住宿推荐"
+      ],
+      "golden_facts": [
+        "湖滨适合第一次到杭州、重视步行逛西湖和城市配套的人，吃饭逛街看湖都比较顺",
+        "白天围绕西湖活动、晚上还希望有完整城市生活感，湖滨通常是最稳的选择",
+        "西湖北线更适合度假、看景和安静休息；灵隐周边更偏景区型住宿与慢节奏",
+        "住湖滨适合西湖经典线，住灵隐周边适合把西湖西侧、灵隐和周边自然区域连起来"
+      ],
+      "expect_type": "answer",
+      "difficulty": "hard",
+      "notes": "跨类型关系检索：问题以景点（西湖）为主体，答案落在住宿文档；现有 region 过滤只能同城共现，需主体级关联才能直接命中",
+      "tags": [
+        "relation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "rel-002",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "到成都主要想泡在宽窄巷子、人民公园一带慢逛，住哪边更合适？",
+      "golden_file_titles": [
+        "成都住宿推荐"
+      ],
+      "golden_facts": [
+        "宽窄巷子和人民公园周边更适合偏好老城气质和慢节奏街区的人",
+        "适合把住宿和城市散步、茶馆氛围、老成都感结合起来；不想住太商业化中心商圈的可以优先考虑",
+        "对比：春熙路和太古里更适合第一次到成都、重视交通便利和商圈配套的人"
+      ],
+      "expect_type": "answer",
+      "difficulty": "mid",
+      "notes": "跨类型关系检索：问题以老城片区为主体，答案落在住宿文档",
+      "tags": [
+        "relation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "rel-003",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "带小孩主要想在亚龙湾玩水度假，住哪个湾区合适？",
+      "golden_file_titles": [
+        "三亚住宿推荐"
+      ],
+      "golden_facts": [
+        "亚龙湾更适合作为度假主住区，尤其适合亲子、情侣和想把海边体验拉满的人",
+        "只要行程重心是海边度假，亚龙湾往往比市区住处更值得多住一晚",
+        "亲子家庭通常更适合亚龙湾或海棠湾，因为度假属性更强、酒店配套更完整"
+      ],
+      "expect_type": "answer",
+      "difficulty": "mid",
+      "notes": "跨类型关系检索：问题以湾区/玩水场景为主体，答案落在住宿文档",
+      "tags": [
+        "relation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "rel-004",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "第二天一早就要进张家界国家森林公园，前一晚住市区还是武陵源？",
+      "golden_file_titles": [
+        "张家界住宿推荐"
+      ],
+      "golden_facts": [
+        "武陵源更适合张家界国家森林公园整日游，也更能减少清晨通勤",
+        "如果第二天要去森林公园，住武陵源更顺；如果第二天要去天门山或当天就要返程，市区更顺",
+        "市区更方便机场、高铁和市内交通，武陵源更方便森林公园"
+      ],
+      "expect_type": "answer",
+      "difficulty": "hard",
+      "notes": "跨类型关系检索：问题以景区（森林公园）为主体，答案落在住宿文档，且需双核心取舍",
+      "tags": [
+        "relation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "rel-005",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "厦门行程以鼓浪屿为主，住哪一片区上岛最方便？",
+      "golden_file_titles": [
+        "厦门住宿推荐"
+      ],
+      "golden_facts": [
+        "轮渡片区最利于鼓浪屿行程，中山路和轮渡片区适合第一次来厦门、重点玩鼓浪屿和老城的人",
+        "鼓浪屿是主线时，轮渡便利性比酒店本身更关键",
+        "环岛路和曾厝垵更适合海边休闲与城市慢节奏；住岛上体验强但搬运行李和上岛组织更复杂"
+      ],
+      "expect_type": "answer",
+      "difficulty": "mid",
+      "notes": "跨类型关系检索：问题以景区（鼓浪屿）为主体，答案落在住宿文档",
+      "tags": [
+        "relation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "rel-006",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "杭州这趟主要想去龙井的茶园片区走走，看看近郊山地的感觉，住哪一片区更合？",
+      "golden_file_titles": [
+        "杭州住宿推荐"
+      ],
+      "golden_facts": [
+        "灵隐周边更适合景区型住宿和慢节奏行程，更适合把灵隐、西湖西侧和自然感结合起来",
+        "更偏看景和放松时优先西湖北线或灵隐周边；更偏城市逛吃和高效移动才优先湖滨或市中心",
+        "住灵隐周边适合把西湖西侧、灵隐和周边自然区域连起来；住西湖北线适合看景和慢游"
+      ],
+      "expect_type": "answer",
+      "difficulty": "hard",
+      "notes": "抗字面重叠多跳：查询主体「龙井」在住宿文档中零出现（只见于景点/线路文档），须先把景点侧「茶园/近郊山地/看杭州另一面」的属性对上住宿侧「看景放松→西湖北线或灵隐周边」的决策逻辑",
+      "tags": [
+        "relation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "rel-007",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "计划杭州加乌镇的 3 日游，第 2 天要从杭州转去乌镇，杭州这两晚住哪一片区更利于转场？",
+      "golden_file_titles": [
+        "杭州住宿推荐"
+      ],
+      "golden_facts": [
+        "第二层辅助区域（武林、钱江新城和更广义的市区核心）更偏交通和商务，不是“住进西湖里”的体验，但对转场很实用",
+        "市中心区域更方便交通换乘；武林和市中心周边的优势是功能完整，适合短停和灵活调整计划",
+        "钱江新城更偏现代城市感和商务便利，适合需要高铁、商务活动或更现代住宿氛围的人"
+      ],
+      "expect_type": "answer",
+      "difficulty": "hard",
+      "notes": "抗字面重叠多跳：查询主体「乌镇」只出现在线路推荐文档，住宿文档零出现；须把线路侧「第2天转乌镇」对上住宿侧「转场/交通换乘型片区」的功能定位",
+      "tags": [
+        "relation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "rel-008",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "三亚这趟最想看鹿回头的傍晚夜景和山海俯瞰，住哪个片区去那边最轻松？",
+      "golden_file_titles": [
+        "三亚住宿推荐"
+      ],
+      "golden_facts": [
+        "大东海更适合想兼顾海边和城市生活便利的人，白天有较多市区活动、晚上想方便找餐厅或散步时很稳",
+        "市区和机场周边的优势是接驳效率和生活配套，更适合短停或对“住得省事”要求高的人",
+        "如果白天景点不多、晚上想轻松活动，大东海通常更合适"
+      ],
+      "expect_type": "answer",
+      "difficulty": "hard",
+      "notes": "抗字面重叠多跳：查询主体「鹿回头」在住宿文档中零出现；景点文档只给出「城市夜景/山海俯瞰」属性，住宿侧须自行给出片区的功能定位（大东海=海边与城市感兼顾、市区=接驳省事）",
+      "tags": [
+        "relation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "rel-009",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "厦门这趟主要想逛沙坡尾和厦大周边的街区，住哪一片区更顺？",
+      "golden_file_titles": [
+        "厦门住宿推荐"
+      ],
+      "golden_facts": [
+        "中山路最适合老城步行；老城散步是主线时，中山路最顺",
+        "中山路和轮渡片区适合第一次来厦门、重点玩老城的人，核心优势是生活方便、吃饭方便",
+        "老城片区更容易找到便于步行的酒店和民宿；环岛路和曾厝垵更适合海边休闲与慢节奏"
+      ],
+      "expect_type": "answer",
+      "difficulty": "hard",
+      "notes": "抗字面重叠多跳：查询主体「沙坡尾」「厦大」在住宿文档中零出现（住宿文档只有中山路/轮渡/环岛路/曾厝垵/厦门站）；须把景点侧「沙坡尾厦大=城市人文街区」对上住宿侧「老城步行型片区」",
+      "tags": [
+        "relation",
+        "retrieval",
+        "tourism"
+      ]
+    },
+    {
+      "id": "rel-010",
+      "domain": "tourism",
+      "intent": "fact",
+      "query": "成都这趟主要想去武侯祠和锦里补补历史文化这条线，晚上想安静些、不太想要商圈的喧闹，住哪片区更贴？",
+      "golden_file_titles": [
+        "成都住宿推荐"
+      ],
+      "golden_facts": [
+        "宽窄巷子和人民公园周边更适合偏好老城气质和慢节奏街区的人，更适合把住宿和城市散步、茶馆氛围、老成都感结合起来",
+        "老城更有城市气质、商圈更有便利性，这是成都住宿最常见的分叉；春熙路和太古里属于商圈配套型",
+        "老城区域更容易找到更有街区感的住宿，也更适合晚上偏安静和生活感的行程"
+      ],
+      "expect_type": "answer",
+      "difficulty": "hard",
+      "notes": "抗字面重叠多跳：查询主体「武侯祠」「锦里」在住宿文档中零出现；须把景点侧「武侯祠锦里=历史文化和传统游客认知」对上住宿侧「老城气质 vs 商圈便利」的分叉逻辑",
+      "tags": [
+        "relation",
+        "retrieval",
+        "tourism"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+<Slide style={{ width: 1280, height: 720, background: '#FAF8F3', position: 'relative', overflow: 'hidden' }}>
+    {/* 全幅水墨山水底图：山体居左，右侧留白骑线标题 */}
+    <Image src="assets/hero_ink_landscape.png" style={{ position: 'absolute', top: 0, left: 0, width: 1280, height: 720, objectFit: 'cover' }} />
+    {/* 右侧留白区标题组 */}
+    <Box style={{ position: 'absolute', top: 150, right: 84, width: 440, flexDirection: 'column', alignItems: 'flex-start', gap: 22 }}>
+        <Box style={{ width: 54, height: 54, borderRadius: 6, background: '#B5542D', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 30, fontWeight: 'bold', color: '#FAF8F3' }}>智</Text>
+        </Box>
+        <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 58, fontWeight: 'bold', color: '#26302C', lineHeight: 1.28 }}>
+            文旅<br />智能问答助手
+        </Text>
+        <Box style={{ width: 64, height: 3, background: '#B5542D' }} />
+        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 20, color: '#26302C', opacity: 0.85 }}>
+            让资料自己开口说话 —— 项目情况汇报
+        </Text>
+        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: '#26302C', opacity: 0.5, letterSpacing: 2 }}>
+            项目组 · 2026 年 9 月
+        </Text>
+    </Box>
+</Slide>

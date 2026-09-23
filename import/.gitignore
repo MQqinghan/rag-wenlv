@@ -1,0 +1,40 @@
+# ===== 敏感配置：绝不上传 =====
+# 含智谱/阿里云/OpenAI/Milvus/MinIO 等真实密钥
+.env
+
+# ===== Python / 虚拟环境 =====
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# ===== IDE 本地配置 =====
+.idea/
+
+# ===== 运行产物 / 日志 / 缓存 =====
+logs/
+output/
+*.log
+
+# ===== 本地 AI 助手工作数据 =====
+.workbuddy/
+
+# ===== 共享层 junction：单一真源在共享层目录（见根 README 结构说明） =====
+# 这三条路径在本工作空间是目录 junction（非真实副本），若纳入版本控制
+# 会把共享层代码重复收进本仓库，破坏"单一真源"约定。切勿删除本段。
+app/shared/
+app/infra/
+app/rag/common/
+
+# ===== 驱动 / 系统残留 =====
+NVIDIA Corporation/
+
+# ===== 测试源文件（可选提交，暂排除） =====
+doc/
+
+# ===== OS 垃圾 =====
+.DS_Store
+Thumbs.db

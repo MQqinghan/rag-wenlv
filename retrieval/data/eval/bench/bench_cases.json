@@ -1,0 +1,23 @@
+{
+  "meta": {
+    "version": "bench-v2",
+    "created": "2026-09-05",
+    "note": "轻量可复现基准用例清单（12 条）：从正式评测集 eval_cases.json 按 id 复用，金标单一大来源，本文件只维护 id 名单。覆盖：文旅 fact 7（含跨城泛推荐 hard）、规划 1、澄清 1、拒答/域外 3。判定规则见 run_bench.py 头注释。",
+    "case_total": 12,
+    "source_file": "../../eval_cases.json"
+  },
+  "include_ids": [
+    "tr-002",
+    "tr-003",
+    "tr-004",
+    "tr-001",
+    "tr-005",
+    "tr-010",
+    "tr-013",
+    "plan-005",
+    "cl-002",
+    "neg-003",
+    "neg-005",
+    "neg-006"
+  ]
+}

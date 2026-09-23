@@ -1,0 +1,240 @@
+<!-- 历史会话管理页：查看全部对话、删除会话、跳转继续对话。 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>青简阁 · 往来录</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+  <style>
+    /* 与 chat.html 同款古风变量 */
+    :root{
+      --yue-bai: #f0f4f8;
+      --yue-light: #f8fafc;
+      --qing-main: #6b9080;
+      --qing-dark: #52766a;
+      --qing-light: #a4c3b2;
+      --qing-ghost: rgba(107,144,128,.12);
+      --mo-dark: #2c3e50;
+      --mo-mid: #4a5c6a;
+      --mo-light: #7a8a99;
+      --zhu-red: #b22222;
+      --an-gold: #b8860b;
+      --border: rgba(107,144,128,.32);
+      --shadow: 0 6px 24px rgba(107,144,128,.16);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: 'Noto Serif SC', '宋体', serif;
+      background-image:
+        linear-gradient(rgba(240,244,248,0.62), rgba(248,250,252,0.68)),
+        url('/preview.jpg');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      color:var(--mo-dark);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      padding:24px 18px;
+    }
+    .app{
+      width:100%;
+      max-width:860px;
+      background:rgba(248,250,252,0.92);
+      backdrop-filter: blur(5px);
+      border:1px solid var(--border);
+      border-radius:6px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .topbar{
+      display:flex;align-items:center;gap:12px;
+      padding:14px 20px;border-bottom:1px solid var(--border);
+      background:linear-gradient(90deg, var(--qing-ghost), transparent 70%);
+    }
+    .logo{
+      width:38px;height:38px;border-radius:4px;
+      background:var(--qing-main);color:var(--yue-light);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'ZCOOL XiaoWei','KaiTi',serif;font-size:22px;font-weight:700;
+    }
+    .title{display:flex;flex-direction:column;line-height:1.2}
+    .title strong{font-family:'ZCOOL XiaoWei','KaiTi',serif;font-size:17px;letter-spacing:3px}
+    .title span{font-size:12px;color:var(--mo-light);margin-top:3px;letter-spacing:1px}
+    .top-actions{margin-left:auto;display:flex;gap:10px}
+    .btn{
+      border:1px solid var(--qing-dark);background:var(--qing-main);color:var(--yue-light);
+      padding:7px 14px;border-radius:2px;font-size:12px;cursor:pointer;
+      font-family:'ZCOOL XiaoWei','KaiTi',serif;letter-spacing:3px;transition:background-color .2s;
+    }
+    .btn:hover{background:var(--qing-dark)}
+    .btn.ghost{background:rgba(255,255,255,.7);color:var(--mo-mid);border-color:var(--border)}
+    .btn.ghost:hover{background:var(--qing-ghost);color:var(--qing-dark)}
+    .btn.danger{background:rgba(178,34,34,.08);color:var(--zhu-red);border-color:rgba(178,34,34,.4)}
+    .btn.danger:hover{background:rgba(178,34,34,.18)}
+
+    .list{padding:14px 16px 20px}
+    .empty{
+      text-align:center;color:var(--mo-light);font-size:14px;
+      font-family:'ZCOOL XiaoWei','KaiTi',serif;letter-spacing:2px;padding:56px 0;
+    }
+    .card{
+      display:flex;align-items:center;gap:14px;
+      border:1px solid var(--border);border-radius:4px;
+      background:rgba(255,255,255,.85);
+      padding:14px 16px;margin:10px 0;cursor:pointer;
+      transition:border-color .2s, box-shadow .2s;
+    }
+    .card:hover{border-color:var(--qing-main);box-shadow:0 4px 14px rgba(107,144,128,.14)}
+    .card .no{
+      width:36px;height:36px;border-radius:4px;flex:0 0 auto;
+      background:var(--qing-ghost);border:1px solid var(--border);
+      color:var(--qing-dark);display:flex;align-items:center;justify-content:center;
+      font-family:'ZCOOL XiaoWei','KaiTi',serif;font-size:15px;
+    }
+    .card .info{flex:1;min-width:0}
+    .card .t{
+      font-size:14px;color:var(--mo-dark);font-weight:700;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .card .p{
+      font-size:12px;color:var(--mo-light);margin-top:4px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .card .side{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:0 0 auto}
+    .card .time{font-size:11px;color:var(--mo-light);font-family:'ZCOOL XiaoWei',serif;letter-spacing:1px}
+    .card .ops{display:flex;gap:8px}
+    .card .ops .btn{padding:5px 10px;font-size:11px;letter-spacing:2px}
+
+    #toast{
+      position:fixed;left:50%;top:24px;transform:translateX(-50%) translateY(-12px);
+      background:rgba(44,62,80,.92);color:var(--yue-light);
+      font-family:'ZCOOL XiaoWei','KaiTi',serif;font-size:13px;letter-spacing:2px;
+      padding:10px 18px;border-radius:4px;box-shadow:var(--shadow);
+      opacity:0;pointer-events:none;transition:all .25s;z-index:999;
+    }
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="logo">录</div>
+      <div class="title">
+        <strong>往来录 · 历史对话</strong>
+        <span id="subTitle">查看 / 删除 / 继续旧日对话</span>
+      </div>
+      <div class="top-actions">
+        <button class="btn" id="btnNew">新建对话</button>
+        <button class="btn ghost" id="btnBack">返回问答</button>
+      </div>
+    </div>
+    <div class="list" id="list">
+      <div class="empty">卷宗加载中…</div>
+    </div>
+  </div>
+  <div id="toast"></div>
+
+  <script>
+    const API_BASE = location.origin.startsWith('http') ? location.origin : 'http://127.0.0.1:8001';
+    const listEl = document.getElementById('list');
+
+    function showToast(msg){
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => t.classList.remove('show'), 2400);
+    }
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+        .replaceAll('"','&quot;').replaceAll("'","&#039;");
+    }
+    function formatTime(ts){
+      const n = Number(ts);
+      if(!ts || Number.isNaN(n)) return '时间未知';
+      return new Date(n * 1000).toLocaleString('zh-CN', {
+        month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'
+      });
+    }
+
+    async function loadSessions(){
+      listEl.innerHTML = '<div class="empty">卷宗加载中…</div>';
+      let sessions = [];
+      try{
+        const res = await fetch(`${API_BASE}/sessions?limit=50`);
+        if(!res.ok) throw new Error('bad status');
+        const data = await res.json();
+        sessions = Array.isArray(data.sessions) ? data.sessions : [];
+      }catch(e){
+        listEl.innerHTML = '<div class="empty">加载失败：服务未连接，请确认查询服务已启动</div>';
+        return;
+      }
+      if(sessions.length === 0){
+        listEl.innerHTML = '<div class="empty">尚无对话卷宗，去开启第一段对话吧</div>';
+        return;
+      }
+      listEl.innerHTML = '';
+      sessions.forEach((s, i) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.title = '点击继续这段对话';
+        card.innerHTML = `
+          <div class="no">${i + 1}</div>
+          <div class="info">
+            <div class="t">${escapeHtml(s.title || '（无标题对话）')}</div>
+            <div class="p">${escapeHtml(s.preview || '（暂无内容）')}</div>
+          </div>
+          <div class="side">
+            <div class="time">${escapeHtml(formatTime(s.last_ts))} · ${s.message_count || 0} 条</div>
+            <div class="ops">
+              <button class="btn" data-act="open" data-sid="${escapeHtml(s.session_id)}">继续对话</button>
+              <button class="btn danger" data-act="del" data-sid="${escapeHtml(s.session_id)}">删除</button>
+            </div>
+          </div>`;
+        listEl.appendChild(card);
+      });
+    }
+
+    listEl.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-act]');
+      const card = e.target.closest('.card');
+      if(btn && btn.dataset.act === 'del'){
+        e.stopPropagation();
+        const sid = btn.dataset.sid;
+        if(!sid) return;
+        if(!confirm('确定删除这段对话吗？\n将删除该会话的全部服务端记录，无法恢复。')) return;
+        btn.disabled = true;
+        try{
+          const res = await fetch(`${API_BASE}/history/${sid}`, { method:'DELETE' });
+          if(res.ok){ showToast('对话已删除'); loadSessions(); }
+          else { showToast('删除失败，请稍后重试'); btn.disabled = false; }
+        }catch(err){
+          showToast('删除失败：服务未连接');
+          btn.disabled = false;
+        }
+        return;
+      }
+      // 点击卡片或"继续对话"：跳回问答页并载入该会话
+      const sid = (btn && btn.dataset.sid) || (card ? card.querySelector('button[data-act="open"]').dataset.sid : '');
+      if(sid){ location.href = `/html?session=${encodeURIComponent(sid)}`; }
+    });
+
+    document.getElementById('btnNew').addEventListener('click', () => {
+      location.href = '/html?new=1';
+    });
+    document.getElementById('btnBack').addEventListener('click', () => {
+      location.href = '/html';
+    });
+
+    loadSessions();
+  </script>
+</body>
+</html>

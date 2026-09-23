@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "version": "trip-v1",
+    "created": "2026-09-09",
+    "note": "结构化行程规划（第四路）评测集。与 data/eval_cases.json（文旅/规划/闲聊 32 题）分离：本组用例驱动 app/process/trip_plan 图（/trip/plan 同源），重点考核「结构化 JSON 完整性 + 高德 POI 事实核查」而非知识库检索。日期从评估当天 +1 天起算（覆盖高德 3~4 天预报窗口）。",
+    "case_total": 4
+  },
+  "cases": [
+    {
+      "id": "trip-001",
+      "note": "北京历史文化 3 日：验证偏好关键词驱动 POI 采集与按天规划完整性",
+      "city": "北京",
+      "travel_days": 3,
+      "transportation": "公共交通",
+      "accommodation": "经济型酒店",
+      "preferences": ["历史文化"],
+      "free_text_input": "多安排一些博物馆",
+      "start_offset_days": 1,
+      "expect_min_attractions_per_day": 2,
+      "expect_weather_window": "覆盖不要求（允许缺日期填 '-'）"
+    },
+    {
+      "id": "trip-002",
+      "note": "上海美食 2 日短途：验证 2 天结构化输出与坐标真实性",
+      "city": "上海",
+      "travel_days": 2,
+      "transportation": "地铁/公交",
+      "accommodation": "舒适型酒店",
+      "preferences": ["美食"],
+      "free_text_input": "",
+      "start_offset_days": 1,
+      "expect_min_attractions_per_day": 2
+    },
+    {
+      "id": "trip-003",
+      "note": "成都自然风光 4 日：验证多天行程（天气可能超出预报窗口仍可生成）",
+      "city": "成都",
+      "travel_days": 4,
+      "transportation": "自驾",
+      "accommodation": "民宿",
+      "preferences": ["自然风光", "美食"],
+      "free_text_input": "节奏不要太赶",
+      "start_offset_days": 1,
+      "expect_min_attractions_per_day": 2
+    },
+    {
+      "id": "trip-004",
+      "note": "杭州休闲 3 日 + 自由文本（想去西湖）：验证额外要求进入规划提示",
+      "city": "杭州",
+      "travel_days": 3,
+      "transportation": "公共交通",
+      "accommodation": "舒适型酒店",
+      "preferences": ["休闲"],
+      "free_text_input": "想去西湖看看",
+      "start_offset_days": 1,
+      "expect_min_attractions_per_day": 2
+    }
+  ]
+}

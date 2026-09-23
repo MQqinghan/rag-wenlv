@@ -1,0 +1,32 @@
+# ==========================================================
+# 导入服务镜像 —— A5 部署切片（T8）
+# 安装组：共享底座 + import extra（dashscope/pandas/openpyxl/requests/imageio-ffmpeg）
+# 对应：app/api/http/import_server.py，端口 8000
+#
+# 构建（项目根目录）：
+#   docker build -f Dockerfile.import -t rag-import:latest .
+# 运行：
+#   docker run --env-file .env.import.example -p 8000:8000 rag-import:latest
+# ==========================================================
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    APP_ROLE=import
+
+WORKDIR /app
+
+# 1) 依赖先行：pyproject/uv.lock 变更才重建这一层
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --extra import
+
+# 2) 代码后拷贝
+COPY . .
+
+EXPOSE 8000
+
+# APP_ROLE=import：启动时按导入端角色自检必需配置；
+# ROLE_STRICT_CHECK=true 时缺失必需配置直接 fail-fast（在 compose/运行时覆盖）
+CMD ["uv", "run", "--frozen", "--extra", "import", "python", "app/api/http/import_server.py"]

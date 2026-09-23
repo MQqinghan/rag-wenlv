@@ -1,0 +1,68 @@
+<Slide style={{ width: 1280, height: 720, background: '#FAF8F3' }}>
+    {/* A 区 · 标题块 */}
+    <Box style={{ height: 110, padding: '24px 64px 0 64px' }}>
+        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: '#2F6E63', letterSpacing: 3 }}>实现 · 整体流程</Text>
+        <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 34, fontWeight: 'bold', color: '#26302C', marginTop: 8 }}>一条问题的一生：从提问到回答</Text>
+    </Box>
+    {/* B 区 · 旅程图 + 洞察 */}
+    <Box style={{ flex: 1, padding: '10px 64px 74px 64px', alignItems: 'center' }}>
+        <svg width={1152} height={266} viewBox='0 0 1152 266'>
+            <line x1='90' y1='64' x2='1062' y2='64' stroke='rgba(38,48,44,0.2)' strokeWidth='2' />
+            <circle cx='90' cy='64' r='26' fill='#2F6E63' />
+            <text x='90' y='70' fontSize='16' fill='#FAF8F3' fontWeight='bold' textAnchor='middle'>1</text>
+            <circle cx='284' cy='64' r='26' fill='#2F6E63' />
+            <text x='284' y='70' fontSize='16' fill='#FAF8F3' fontWeight='bold' textAnchor='middle'>2</text>
+            <circle cx='479' cy='64' r='26' fill='#2F6E63' />
+            <text x='479' y='70' fontSize='16' fill='#FAF8F3' fontWeight='bold' textAnchor='middle'>3</text>
+            <circle cx='673' cy='64' r='26' fill='#2F6E63' />
+            <text x='673' y='70' fontSize='16' fill='#FAF8F3' fontWeight='bold' textAnchor='middle'>4</text>
+            <circle cx='868' cy='64' r='26' fill='#2F6E63' />
+            <text x='868' y='70' fontSize='16' fill='#FAF8F3' fontWeight='bold' textAnchor='middle'>5</text>
+            <circle cx='1062' cy='64' r='26' fill='#B5542D' />
+            <text x='1062' y='70' fontSize='16' fill='#FAF8F3' fontWeight='bold' textAnchor='middle'>6</text>
+            <text x='90' y='120' fontSize='16' fill='#26302C' fontWeight='bold' textAnchor='middle'>提问</text>
+            <text x='90' y='142' fontSize='12.5' fill='rgba(38,48,44,0.6)' textAnchor='middle'>用户一句话</text>
+            <text x='284' y='120' fontSize='16' fill='#26302C' fontWeight='bold' textAnchor='middle'>分诊</text>
+            <text x='284' y='142' fontSize='12.5' fill='rgba(38,48,44,0.6)' textAnchor='middle'>听懂来意</text>
+            <text x='479' y='120' fontSize='16' fill='#26302C' fontWeight='bold' textAnchor='middle'>找资料</text>
+            <text x='479' y='142' fontSize='12.5' fill='rgba(38,48,44,0.6)' textAnchor='middle'>检索相关内容</text>
+            <text x='673' y='120' fontSize='16' fill='#26302C' fontWeight='bold' textAnchor='middle'>精挑细选</text>
+            <text x='673' y='142' fontSize='12.5' fill='rgba(38,48,44,0.6)' textAnchor='middle'>只留最相关几段</text>
+            <text x='868' y='120' fontSize='16' fill='#26302C' fontWeight='bold' textAnchor='middle'>组织回答</text>
+            <text x='868' y='142' fontSize='12.5' fill='rgba(38,48,44,0.6)' textAnchor='middle'>串成通顺的话</text>
+            <text x='1062' y='120' fontSize='16' fill='#26302C' fontWeight='bold' textAnchor='middle'>带出处回复</text>
+            <text x='1062' y='142' fontSize='12.5' fill='rgba(38,48,44,0.6)' textAnchor='middle'>注明来源文件</text>
+            <path d='M479 92 V150 H868 V92' fill='none' stroke='rgba(181,84,45,0.55)' strokeWidth='2' strokeDasharray='5 5' />
+            <line x1='545' y1='150' x2='545' y2='170' stroke='rgba(181,84,45,0.55)' strokeWidth='2' strokeDasharray='5 5' />
+            <line x1='673' y1='150' x2='673' y2='170' stroke='rgba(181,84,45,0.55)' strokeWidth='2' strokeDasharray='5 5' />
+            <line x1='801' y1='150' x2='801' y2='170' stroke='rgba(181,84,45,0.55)' strokeWidth='2' strokeDasharray='5 5' />
+            <rect x='489' y='170' width='112' height='38' rx='8' fill='rgba(181,84,45,0.08)' stroke='rgba(181,84,45,0.5)' strokeWidth='1' />
+            <text x='545' y='194' fontSize='14' fill='#B5542D' fontWeight='bold' textAnchor='middle'>查天气</text>
+            <rect x='617' y='170' width='112' height='38' rx='8' fill='rgba(181,84,45,0.08)' stroke='rgba(181,84,45,0.5)' strokeWidth='1' />
+            <text x='673' y='194' fontSize='14' fill='#B5542D' fontWeight='bold' textAnchor='middle'>查路线</text>
+            <rect x='745' y='170' width='112' height='38' rx='8' fill='rgba(181,84,45,0.08)' stroke='rgba(181,84,45,0.5)' strokeWidth='1' />
+            <text x='801' y='194' fontSize='14' fill='#B5542D' fontWeight='bold' textAnchor='middle'>看时间</text>
+            <text x='673' y='244' fontSize='13.5' fill='#B5542D' fontWeight='bold' textAnchor='middle'>规划类问题 · 三路并行 · 答案汇回主线</text>
+        </svg>
+        <Box style={{ flexDirection: 'row', gap: 20, marginTop: 14 }}>
+            <Box style={{ flex: 1, background: 'rgba(47,110,99,0.05)', borderRadius: 10, padding: '14px 20px', borderLeft: '4px solid #2F6E63' }}>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 15, color: '#26302C', lineHeight: 1.6 }}>
+                    <span style={{ fontWeight: 'bold', color: '#2F6E63' }}>每个回答都注明「出自哪份资料」</span>——可溯源，不空口断言。
+                </Text>
+            </Box>
+            <Box style={{ flex: 1, background: 'rgba(47,110,99,0.05)', borderRadius: 10, padding: '14px 20px', borderLeft: '4px solid #2F6E63' }}>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 15, color: '#26302C', lineHeight: 1.6 }}>
+                    <span style={{ fontWeight: 'bold', color: '#2F6E63' }}>查不到就直说查不到</span>——我们专门用「陷阱题」考过它。
+                </Text>
+            </Box>
+        </Box>
+        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 15, color: 'rgba(38,48,44,0.65)', marginTop: 14 }}>
+            流程跑通了——下一页，用一场考试证明它真的可靠。
+        </Text>
+    </Box>
+    {/* C 区 · 页脚 */}
+    <Box style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: '0 64px' }}>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>文旅智能问答助手</Text>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>08 / 10</Text>
+    </Box>
+</Slide>

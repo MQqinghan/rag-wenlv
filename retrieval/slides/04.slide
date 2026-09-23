@@ -1,0 +1,68 @@
+<Slide style={{ width: 1280, height: 720, background: '#FAF8F3' }}>
+    {/* A 区 · 标题块 */}
+    <Box style={{ height: 110, padding: '24px 64px 0 64px' }}>
+        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: '#2F6E63', letterSpacing: 3 }}>实现 · 总览</Text>
+        <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 34, fontWeight: 'bold', color: '#26302C', marginTop: 8 }}>一家「资料服务馆」：三大模块</Text>
+    </Box>
+    {/* B 区 · 左主色栏 33% / 右三模块 67% */}
+    <Box style={{ flex: 1, padding: '18px 64px 74px 64px', flexDirection: 'row', gap: 28 }}>
+        <Box style={{ width: 340, borderRadius: 14, padding: '30px 28px 26px 28px', background: 'linear-gradient(160deg, rgba(47,110,99,0.96) 0%, rgba(47,110,99,0.70) 100%)' }}>
+            <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.75)', letterSpacing: 3 }}>总分总 · 先看整体</Text>
+            <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 30, fontWeight: 'bold', color: '#FAF8F3', lineHeight: 1.45, marginTop: 16 }}>接待、馆藏、定制服务<br />各司其职</Text>
+            <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 16, color: 'rgba(255,255,255,0.92)', lineHeight: 1.7, marginTop: 18 }}>
+                整个系统像一家「资料服务馆」：前台负责听懂来意，书库负责找出依据，顾问负责张罗行程。
+            </Text>
+            <Box style={{ marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.3)', paddingTop: 16 }}>
+                <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 15, color: 'rgba(255,255,255,0.88)', lineHeight: 1.6 }}>
+                    三个模块各自独立、相互接力。接下来两页，展开其中两个核心能力。
+                </Text>
+            </Box>
+        </Box>
+        <Box style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-between' }}>
+            <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 22, background: 'rgba(47,110,99,0.05)', borderRadius: 12, padding: '22px 26px' }}>
+                <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 44, fontWeight: 'bold', color: '#2F6E63', opacity: 0.55 }}>壹</Text>
+                <Box style={{ flex: 1 }}>
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                        <FAIcon name='concierge-bell' style={{ fill: '#2F6E63', width: 24, height: 24 }} />
+                        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 21, fontWeight: 'bold', color: '#26302C' }}>前台分诊台</Text>
+                        <Text style={{ fontSize: 14, color: '#2F6E63', background: 'rgba(47,110,99,0.1)', borderRadius: 10, padding: '2px 12px' }}>意图识别</Text>
+                    </Box>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 16, color: '#26302C', opacity: 0.75, lineHeight: 1.55, marginTop: 10 }}>
+                        听懂你问的是书、是景、还是闲聊，把问题分给对的人接手。
+                    </Text>
+                </Box>
+            </Box>
+            <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 22, background: 'rgba(47,110,99,0.05)', borderRadius: 12, padding: '22px 26px' }}>
+                <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 44, fontWeight: 'bold', color: '#2F6E63', opacity: 0.55 }}>贰</Text>
+                <Box style={{ flex: 1 }}>
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                        <FAIcon name='book' style={{ fill: '#2F6E63', width: 24, height: 24 }} />
+                        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 21, fontWeight: 'bold', color: '#26302C' }}>图书馆</Text>
+                        <Text style={{ fontSize: 14, color: '#2F6E63', background: 'rgba(47,110,99,0.1)', borderRadius: 10, padding: '2px 12px' }}>知识检索与回答</Text>
+                    </Box>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 16, color: '#26302C', opacity: 0.75, lineHeight: 1.55, marginTop: 10 }}>
+                        资料分门别类上架；提问后先找出最相关的几段，再组织成注明出处的回答。
+                    </Text>
+                </Box>
+            </Box>
+            <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 22, background: 'rgba(181,84,45,0.06)', borderRadius: 12, padding: '22px 26px' }}>
+                <Text style={{ fontFamily: '"Source Han Serif SC","Noto Serif SC",serif', fontSize: 44, fontWeight: 'bold', color: '#B5542D', opacity: 0.6 }}>叁</Text>
+                <Box style={{ flex: 1 }}>
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                        <FAIcon name='umbrella-beach' style={{ fill: '#B5542D', width: 24, height: 24 }} />
+                        <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 21, fontWeight: 'bold', color: '#26302C' }}>旅行顾问</Text>
+                        <Text style={{ fontSize: 14, color: '#B5542D', background: 'rgba(181,84,45,0.1)', borderRadius: 10, padding: '2px 12px' }}>行程规划</Text>
+                    </Box>
+                    <Text style={{ fontFamily: '"Source Han Sans SC","Noto Sans SC",sans-serif', fontSize: 16, color: '#26302C', opacity: 0.75, lineHeight: 1.55, marginTop: 10 }}>
+                        查天气、查驾车路线、看当地时间，把零散信息拼成一份行程参考。
+                    </Text>
+                </Box>
+            </Box>
+        </Box>
+    </Box>
+    {/* C 区 · 页脚 */}
+    <Box style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: '0 64px' }}>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>文旅智能问答助手</Text>
+        <Text style={{ fontSize: 14, color: 'rgba(38,48,44,0.45)' }}>04 / 10</Text>
+    </Box>
+</Slide>

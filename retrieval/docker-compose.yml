@@ -1,0 +1,158 @@
+# ==========================================================
+# 文旅 + 行程规划 RAG 系统 —— 部署切片编排（A5 / T8）
+#
+# 本仓（检索生成域）承载两个部署单元，静态依赖图实测跨端引用 0 条：
+#   query   8001  查询服务（仅共享底座，加载 bge-m3 / reranker 模型）
+#   gateway 8002  移动端 BFF（不加载模型，仅 4 个 Web 依赖）
+# 注：导入服务（import:8000，共享底座 + import extra）属导入域工作空间，
+#     编排文件在 RAG_文旅_import/docker-compose.yml（本仓不含 Dockerfile.import）。
+#
+# 常用命令：
+#   docker compose up -d --build              # 起两个应用服务（query/gateway）
+#   docker compose --profile infra up -d      # 附带 Milvus/Mongo/MinIO（首次本地起全套）
+#   docker compose logs -f query              # 跟查询服务日志
+#   docker compose down
+#
+# 配置：默认读取仓库根目录 .env（各服务按 APP_ROLE 只消费自己那一段，见 docs/部署清单.md）
+# 严格自检：容器默认 ROLE_STRICT_CHECK=true，缺必需配置直接 fail-fast，不静默带病启动。
+# ==========================================================
+
+services:
+  # ---------------- 查询服务 ----------------
+  query:
+    build:
+      context: .
+      dockerfile: Dockerfile.query
+    image: rag-query:latest
+    container_name: rag-query
+    env_file:
+      - .env
+    environment:
+      APP_ROLE: query
+      ROLE_STRICT_CHECK: "true"
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./models:/app/models
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  # ---------------- 移动端 BFF 网关 ----------------
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    image: rag-gateway:latest
+    container_name: rag-gateway
+    environment:
+      APP_ROLE: gateway
+      ROLE_STRICT_CHECK: "true"
+      QUERY_HOST: query          # compose 内用服务名通信
+      QUERY_PORT: "8001"
+      MOBILE_GATEWAY_PORT: "8002"
+    ports:
+      - "8002:8002"
+    depends_on:
+      - query
+    restart: unless-stopped
+
+  # ==========================================================
+  # 以下为基础组件。生产环境通常复用已有 Milvus/Mongo/MinIO，
+  # 用 `--profile infra` 才会启动，避免与既有实例抢端口。
+  # 启动时请同步把 .env 里 MILVUS_URL / MONGO_URL / MINIO_ENDPOINT 指向容器内地址。
+  # ==========================================================
+  mongo:
+    profiles: ["infra"]
+    image: mongo:7
+    container_name: rag-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+  # T9：LLM 调用缓存后端（CACHE_BACKEND=redis 时启用；多进程·重启后全局共享）
+  redis:
+    profiles: ["infra"]
+    image: redis:7-alpine
+    container_name: rag-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  # T14：12306 铁路查询 MCP（Streamable HTTP，供 query 服务 rail_gateway 调用）
+  # 主机映射 8010 → 容器 8000，与 uvx 形态（SERVER_PORT=8010）端点一致，
+  # 故 .env 的 RAIL_MCP_URL=http://127.0.0.1:8010/mcp 两种形态通用。
+  # 容器内互访时改 RAIL_MCP_URL=http://rail-mcp:8000/mcp（无需主机映射）。
+  rail-mcp:
+    profiles: ["infra"]
+    build:
+      context: .
+      dockerfile: Dockerfile.rail-mcp
+    image: rag-rail-mcp:latest
+    container_name: rag-rail-mcp
+    environment:
+      SERVER_HOST: "0.0.0.0"
+      SERVER_PORT: "8000"
+      LOG_LEVEL: "INFO"
+    ports:
+      - "8010:8000"
+    restart: unless-stopped
+
+  minio:
+    profiles: ["infra"]
+    image: minio/minio:latest
+    container_name: rag-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    restart: unless-stopped
+
+  # Milvus standalone 依赖 etcd + 对象存储，官方编排较重；
+  # 这里只给出最小可用声明，生产建议直接用 Milvus 官方 docker-compose 或云服务。
+  etcd:
+    profiles: ["infra"]
+    image: quay.io/coreos/etcd:v3.5.16
+    container_name: rag-etcd
+    environment:
+      ETCD_AUTO_COMPACTION_MODE: revision
+      ETCD_AUTO_COMPACTION_RETENTION: "1000"
+      ETCD_QUOTA_BACKEND_BYTES: "4294967296"
+      ETCD_SNAPSHOT_COUNT: "50000"
+    command: etcd -advertise-client-urls=http://etcd:2379 -listen-client-urls http://0.0.0.0:2379
+    volumes:
+      - etcd-data:/etcd
+    restart: unless-stopped
+
+  milvus:
+    profiles: ["infra"]
+    image: milvusdb/milvus:v2.5.10
+    container_name: rag-milvus
+    command: ["milvus", "run", "standalone"]
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+    volumes:
+      - milvus-data:/var/lib/milvus
+    ports:
+      - "19530:19530"
+    depends_on:
+      - etcd
+      - minio
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
+  minio-data:
+  etcd-data:
+  milvus-data:
+  redis-data:

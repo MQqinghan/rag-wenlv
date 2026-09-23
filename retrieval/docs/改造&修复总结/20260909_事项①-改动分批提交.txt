@@ -1,0 +1,32 @@
+【事项】① 改动分批提交：为 C 系列 + 天气网关 + 文档改动建立还原点
+【时间】2026-09-09 15:45
+【背景】此前工作树累计 20 项改动零 commit，最近还原点仍是 808f6b9（融合提交），
+       一旦改错无法回退，是当时最大的工程风险。
+
+一、涉及的代码/文件
+  · app/infra/amap_gateway.py                 高德 REST 网关（限流治理）
+  · app/infra/weather_gateway.py              新增：天气统一网关
+  · app/rag/tourism_query/weather_tool_service.py  对话流天气（去掉和风 HTTP 细节）
+  · app/rag/trip_plan/trip_planner_service.py 行程服务（C1 并发 / C2 并发 / C1-fix / 天气联动）
+  · app/resources/prompts/trip/planner.prompt 规划器提示词（每日景点下限规则）
+  · test/test_amap_rate_limit.py  test/test_weather_gateway.py
+    test/test_trip_plan_c1.py     test/test_trip_plan_c2.py
+  · .env.example                              新增 8 项配置
+  · docs/ 下 5 份文档                          执行计划台账、天气迁移注记等
+
+二、干了什么
+  按依赖顺序拆成 4 个自洽 commit（每个都可独立运行，不出现"引用尚不存在的文件"）：
+    1) e5817cf fix(amap)     高德限流治理（C1 并发前置）
+    2) 30423be refactor(weather) 天气统一收口为主备网关（先于 trip，因为 trip 会 import 它）
+    3) c9b15ba feat(trip)    C1 核查并发 + C2 采集并发 + C1-fix 每日下限
+    4) 1532a67 docs          执行计划台账、配置说明、天气迁移注记
+  演示资产（DESIGN.md / STORY.md / assets / slides / pptx）未提交，留待主人决定入库还是忽略。
+
+三、效果
+  · 20 项未提交 → 0（剩余 5 项为有意保留的演示资产）
+  · 提交后 HEAD 导入检查 OK；全部离线单测通过：限流 5/5、天气 6/6、C1 3/3、C2 7/7、trip 基础单测通过
+  · 每个 commit 语义单一、可 cherry-pick、可单独 revert
+
+四、遗留
+  · 同一文件被多个事项连续修改（.env.example、trip_planner_service.py），未做 hunk 级拆分，
+    按"主题归属"整体归入最相关的 commit，成本更低且不破坏自洽性。

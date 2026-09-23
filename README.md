@@ -57,14 +57,6 @@ python scripts/run_quality_gate.py --fast
 
 检索域更详细的说明见 `retrieval/README.md`。
 
-## 快照更新
-
-本仓库内容由三个工作空间同步而来，如需重新同步（会保留本仓 `.git`）：
-
-```bat
-sync_from_workspaces.cmd
-```
-
 ## 外部依赖
 
 Milvus（向量）、MongoDB（文档/会话）、MinIO（对象存储）、Redis（缓存/限流）、自部署 12306-MCP（铁路车次票价）、高德与和风（地理、POI、天气）。所有实时数据以官方来源为准。
